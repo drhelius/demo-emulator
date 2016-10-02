@@ -14,10 +14,6 @@ Follow me on Twitter for updates: http://twitter.com/drhelius
 License
 -------
 
-<i>Gearboy - Nintendo Game Boy Emulator</i>
-
-<i>Copyright (C) 2016  Ignacio Sanchez</i>
-
 <i>This program is free software: you can redistribute it and/or modify</i>
 <i>it under the terms of the GNU General Public License as published by</i>
 <i>the Free Software Foundation, either version 3 of the License, or</i>

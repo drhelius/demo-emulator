@@ -1,0 +1,5 @@
+package input
+
+func test() {
+
+}

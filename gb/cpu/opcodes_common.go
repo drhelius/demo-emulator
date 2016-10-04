@@ -130,7 +130,7 @@ func opcodesINCHL() {
 }
 
 func opcodesDEC(reg *EightBitReg) {
-	result = reg.GetValue()
+	result := reg.GetValue()
 	result--
 	reg.SetValue(result)
 	if isSetFlag(flagCarry) {
@@ -156,15 +156,15 @@ func opcodesDECHL() {
 		clearAllFlags()
 	}
 	toggleFlag(flagSub)
-	toggleZeroFlagFromResult(m_iReadCache)
+	toggleZeroFlagFromResult(result)
 	if (result & 0x0F) == 0x0F {
 		toggleFlag(flagHalf)
 	}
 }
 
 func opcodesADD(number uint8) {
-	var result int = af.GetHigh() + number
-	var carrybits int = af.GetHigh() ^ number ^ result
+	result := uint(af.GetHigh()) + uint(number)
+	carrybits := uint(af.GetHigh()) ^ uint(number) ^ result
 	af.SetHigh(uint8(result))
 	clearAllFlags()
 	toggleZeroFlagFromResult(uint8(result))
@@ -177,194 +177,186 @@ func opcodesADD(number uint8) {
 }
 
 func opcodesADC(number uint8) {
+	var carry uint
+	if isSetFlag(flagCarry) {
+		carry = 1
+	} else {
+		carry = 0
+	}
+	result := uint(af.GetHigh()) + uint(number) + carry
+	clearAllFlags()
+	toggleZeroFlagFromResult(uint8(result))
+	if result > 0xFF {
+		toggleFlag(flagCarry)
+	}
+	if ((uint(af.GetHigh()) & 0x0F) + (uint(number) & 0x0F) + carry) > 0x0F {
+		toggleFlag(flagHalf)
+	}
+	af.SetHigh(uint8(result))
+}
+
+func opcodesSUB(number uint8) {
+	result := int(af.GetHigh()) - int(number)
+	carrybits := int(af.GetHigh()) ^ int(number) ^ result
+	af.SetHigh(uint8(result))
+	setFlag(flagSub)
+	toggleZeroFlagFromResult(uint8(result))
+	if (carrybits & 0x100) != 0 {
+		toggleFlag(flagCarry)
+	}
+	if (carrybits & 0x10) != 0 {
+		toggleFlag(flagHalf)
+	}
+}
+
+func opcodesSBC(number uint8) {
 	var carry int
 	if isSetFlag(flagCarry) {
 		carry = 1
 	} else {
 		carry = 0
 	}
-	var result int = af.GetHigh() + number + carry
-	clearAllFlags()
+	result := int(af.GetHigh()) - int(number) - carry
+	setFlag(flagSub)
 	toggleZeroFlagFromResult(uint8(result))
-	if result > 0xFF {
+	if result < 0 {
 		toggleFlag(flagCarry)
 	}
-	if ((af.GetHigh() & 0x0F) + (number & 0x0F) + carry) > 0x0F {
+	if ((int(af.GetHigh()) & 0x0F) - (int(number) & 0x0F) - carry) < 0 {
 		toggleFlag(flagHalf)
 	}
 	af.SetHigh(uint8(result))
 }
 
+func opcodesADDHL(number uint16) {
+	result := uint(hl.GetValue()) + uint(number)
+	if isSetFlag(flagZero) {
+		setFlag(flagZero)
+	} else {
+		clearAllFlags()
+	}
+	if (result & 0x10000) != 0 {
+		toggleFlag(flagCarry)
+	}
+	if ((uint(hl.GetValue()) ^ uint(number) ^ (result & 0xFFFF)) & 0x1000) != 0 {
+		toggleFlag(flagHalf)
+	}
+	hl.SetValue(uint16(result))
+}
+
+func opcodesADDSP(number int8) {
+	result := int(sp.GetValue()) + int(number)
+	clearAllFlags()
+	carrybits := int(sp.GetValue()) ^ int(number) ^ (result & 0xFFFF)
+	if (carrybits & 0x100) == 0x100 {
+		toggleFlag(flagCarry)
+	}
+	if (carrybits & 0x10) == 0x10 {
+		toggleFlag(flagHalf)
+	}
+	sp.SetValue(uint16(result))
+}
+
+func opcodesSWAPReg(reg *EightBitReg) {
+	lowHalf := reg.GetValue() & 0x0F
+	highHalf := (reg.GetValue() >> 4) & 0x0F
+	reg.SetValue((lowHalf << 4) + highHalf)
+	clearAllFlags()
+	toggleZeroFlagFromResult(reg.GetValue())
+}
+
+func opcodesSWAPHL() {
+	address := hl.GetValue()
+	result := memory.Read(address)
+	lowHalf := result & 0x0F
+	highHalf := (result >> 4) & 0x0F
+	result = (lowHalf << 4) + highHalf
+	memory.Write(address, result)
+	clearAllFlags()
+	toggleZeroFlagFromResult(result)
+}
+
+func opcodesSLA(reg *EightBitReg) {
+	if (reg.GetValue() & 0x80) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := reg.GetValue() << 1
+	reg.SetValue(result)
+	toggleZeroFlagFromResult(result)
+}
+
+func opcodesSLAHL() {
+	address := hl.GetValue()
+	result := memory.Read(address)
+	if (result & 0x80) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result <<= 1
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
+}
+
+func opcodesSRA(reg *EightBitReg) {
+	value := reg.GetValue()
+	if (value & 0x01) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := value >> 1
+	if (value & 0x80) != 0 {
+		result |= 0x80
+	}
+	reg.SetValue(result)
+	toggleZeroFlagFromResult(result)
+}
+
+func opcodesSRAHL() {
+	address := hl.GetValue()
+	value := memory.Read(address)
+	if (value & 0x01) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := value >> 1
+	if (value & 0x80) != 0 {
+		result |= 0x80
+	}
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
+}
+
+func opcodesSRL(reg *EightBitReg) {
+	result := reg.GetValue()
+	if (result & 0x01) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result >>= 1
+	reg.SetValue(result)
+	toggleZeroFlagFromResult(result)
+}
+
+func opcodesSRLHL() {
+	address := hl.GetValue()
+	result := memory.Read(address)
+	if (result & 0x01) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result >>= 1
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
+}
+
 /*
-func OPCodes_SUB(uint8 number)
-{
-    int result = af.GetHigh() - number;
-    int carrybits = af.GetHigh() ^ number ^ result;
-    af.SetHigh(static_cast<uint8> (result));
-    setFlag(flagSub);
-    toggleZeroFlagFromResult(static_cast<uint8> (result));
-    if ((carrybits & 0x100) != 0)
-    {
-        toggleFlag(flagCarry);
-    }
-    if ((carrybits & 0x10) != 0)
-    {
-        toggleFlag(flagHalf);
-    }
-}
-
-func OPCodes_SBC(uint8 number)
-{
-    int carry = isSetFlag(flagCarry) ? 1 : 0;
-    int result = af.GetHigh() - number - carry;
-    setFlag(flagSub);
-    toggleZeroFlagFromResult(static_cast<uint8> (result));
-    if (result < 0)
-    {
-        toggleFlag(flagCarry);
-    }
-    if (((af.GetHigh() & 0x0F) - (number & 0x0F) - carry) < 0)
-    {
-        toggleFlag(flagHalf);
-    }
-    af.SetHigh(static_cast<uint8> (result));
-}
-
-func OPCodes_ADD_HL(u16 number)
-{
-    int result = HL.GetValue() + number;
-    isSetFlag(flagZero) ? setFlag(flagZero) : clearAllFlags();
-    if (result & 0x10000)
-    {
-        toggleFlag(flagCarry);
-    }
-    if ((HL.GetValue() ^ number ^ (result & 0xFFFF)) & 0x1000)
-    {
-        toggleFlag(flagHalf);
-    }
-    HL.SetValue(static_cast<u16> (result));
-}
-
-func OPCodes_ADD_sp(s8 number)
-{
-    int result = sp.GetValue() + number;
-    clearAllFlags();
-    if (((sp.GetValue() ^ number ^ (result & 0xFFFF)) & 0x100) == 0x100)
-    {
-        toggleFlag(flagCarry);
-    }
-    if (((sp.GetValue() ^ number ^ (result & 0xFFFF)) & 0x10) == 0x10)
-    {
-        toggleFlag(flagHalf);
-    }
-    sp.SetValue(static_cast<u16> (result));
-}
-
-func OPCodes_SWAP_Register(EightBitRegister* reg)
-{
-    uint8 low_half = reg->GetValue() & 0x0F;
-    uint8 high_half = (reg->GetValue() >> 4) & 0x0F;
-    reg->SetValue((low_half << 4) + high_half);
-    clearAllFlags();
-    toggleZeroFlagFromResult(reg->GetValue());
-}
-
-func OPCodes_SWAP_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    uint8 low_half = m_iReadCache & 0x0F;
-    uint8 high_half = (m_iReadCache >> 4) & 0x0F;
-    m_iReadCache = (low_half << 4) + high_half;
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    clearAllFlags();
-    toggleZeroFlagFromResult(m_iReadCache);
-}
-
-func OPCodes_SLA(EightBitRegister* reg)
-{
-    (reg->GetValue() & 0x80) != 0 ? setFlag(flagCarry) : clearAllFlags();
-    uint8 result = reg->GetValue() << 1;
-    reg->SetValue(result);
-    toggleZeroFlagFromResult(result);
-}
-
-func OPCodes_SLA_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    (m_iReadCache & 0x80) != 0 ? setFlag(flagCarry) : clearAllFlags();
-    m_iReadCache <<= 1;
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
-}
-
-func OPCodes_SRA(EightBitRegister* reg)
-{
-    uint8 result = reg->GetValue();
-    (result & 0x01) != 0 ? setFlag(flagCarry) : clearAllFlags();
-    if ((result & 0x80) != 0)
-    {
-        result >>= 1;
-        result |= 0x80;
-    }
-    else
-    {
-        result >>= 1;
-    }
-    reg->SetValue(result);
-    toggleZeroFlagFromResult(result);
-}
-
-func OPCodes_SRA_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    (m_iReadCache & 0x01) != 0 ? setFlag(flagCarry) : clearAllFlags();
-    if ((m_iReadCache & 0x80) != 0)
-    {
-        m_iReadCache >>= 1;
-        m_iReadCache |= 0x80;
-    }
-    else
-    {
-        m_iReadCache >>= 1;
-    }
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
-}
-
-func OPCodes_SRL(EightBitRegister* reg)
-{
-    uint8 result = reg->GetValue();
-    (result & 0x01) != 0 ? setFlag(flagCarry) : clearAllFlags();
-    result >>= 1;
-    reg->SetValue(result);
-    toggleZeroFlagFromResult(result);
-}
-
-func OPCodes_SRL_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    (m_iReadCache & 0x01) != 0 ? setFlag(flagCarry) : clearAllFlags();
-    m_iReadCache >>= 1;
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
-}
-
 func OPCodes_RLC(EightBitRegister* reg, bool isRegisterA)
 {
     uint8 result = reg->GetValue();

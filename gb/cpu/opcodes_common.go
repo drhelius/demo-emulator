@@ -356,208 +356,180 @@ func opcodesSRLHL() {
 	toggleZeroFlagFromResult(result)
 }
 
-/*
-func OPCodes_RLC(EightBitRegister* reg, bool isRegisterA)
-{
-    uint8 result = reg->GetValue();
-    if ((result & 0x80) != 0)
-    {
-        setFlag(flagCarry);
-        result <<= 1;
-        result |= 0x1;
-    }
-    else
-    {
-        clearAllFlags();
-        result <<= 1;
-    }
-    reg->SetValue(result);
-    if (!isRegisterA)
-    {
-        toggleZeroFlagFromResult(result);
-    }
+func opcodesRLC(reg *EightBitReg, isRegisterA bool) {
+	value := reg.GetValue()
+	result := value << 1
+	if (value & 0x80) != 0 {
+		setFlag(flagCarry)
+		result |= 0x01
+	} else {
+		clearAllFlags()
+	}
+	reg.SetValue(result)
+	if !isRegisterA {
+		toggleZeroFlagFromResult(result)
+	}
 }
 
-func OPCodes_RLC_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    if ((m_iReadCache & 0x80) != 0)
-    {
-        setFlag(flagCarry);
-        m_iReadCache <<= 1;
-        m_iReadCache |= 0x1;
-    }
-    else
-    {
-        clearAllFlags();
-        m_iReadCache <<= 1;
-    }
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
+func opcodesRLCHL() {
+	address := hl.GetValue()
+	value := memory.Read(address)
+	result := value << 1
+	if (value & 0x80) != 0 {
+		setFlag(flagCarry)
+		result |= 0x01
+	} else {
+		clearAllFlags()
+	}
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
 }
 
-func OPCodes_RL(EightBitRegister* reg, bool isRegisterA)
-{
-    uint8 carry = isSetFlag(flagCarry) ? 1 : 0;
-    uint8 result = reg->GetValue();
-    ((result & 0x80) != 0) ? setFlag(flagCarry) : clearAllFlags();
-    result <<= 1;
-    result |= carry;
-    reg->SetValue(result);
-    if (!isRegisterA)
-    {
-        toggleZeroFlagFromResult(result);
-    }
+func opcodesRL(reg *EightBitReg, isRegisterA bool) {
+	var carry uint8
+	if isSetFlag(flagCarry) {
+		carry = 0x01
+	} else {
+		carry = 0x00
+	}
+	value := reg.GetValue()
+	if (value & 0x80) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := (value << 1) | carry
+	reg.SetValue(result)
+	if !isRegisterA {
+		toggleZeroFlagFromResult(result)
+	}
 }
 
-func OPCodes_RL_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    uint8 carry = isSetFlag(flagCarry) ? 1 : 0;
-    ((m_iReadCache & 0x80) != 0) ? setFlag(flagCarry) : clearAllFlags();
-    m_iReadCache <<= 1;
-    m_iReadCache |= carry;
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
+func opcodesRLHL() {
+	var carry uint8
+	if isSetFlag(flagCarry) {
+		carry = 0x01
+	} else {
+		carry = 0x00
+	}
+	address := hl.GetValue()
+	value := memory.Read(address)
+	if (value & 0x80) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := (value << 1) | carry
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
 }
 
-func OPCodes_RRC(EightBitRegister* reg, bool isRegisterA)
-{
-    uint8 result = reg->GetValue();
-    if ((result & 0x01) != 0)
-    {
-        setFlag(flagCarry);
-        result >>= 1;
-        result |= 0x80;
-    }
-    else
-    {
-        clearAllFlags();
-        result >>= 1;
-    }
-    reg->SetValue(result);
-    if (!isRegisterA)
-    {
-        toggleZeroFlagFromResult(result);
-    }
+func opcodesRRC(reg *EightBitReg, isRegisterA bool) {
+	value := reg.GetValue()
+	result := value >> 1
+	if (value & 0x01) != 0 {
+		setFlag(flagCarry)
+		result |= 0x80
+	} else {
+		clearAllFlags()
+	}
+	reg.SetValue(result)
+	if !isRegisterA {
+		toggleZeroFlagFromResult(result)
+	}
 }
 
-func OPCodes_RRC_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    if ((m_iReadCache & 0x01) != 0)
-    {
-        setFlag(flagCarry);
-        m_iReadCache >>= 1;
-        m_iReadCache |= 0x80;
-    }
-    else
-    {
-        clearAllFlags();
-        m_iReadCache >>= 1;
-    }
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
+func opcodesRRCHL() {
+	address := hl.GetValue()
+	value := memory.Read(address)
+	result := value >> 1
+	if (value & 0x01) != 0 {
+		setFlag(flagCarry)
+		result |= 0x80
+	} else {
+		clearAllFlags()
+	}
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
 }
 
-func OPCodes_RR(EightBitRegister* reg, bool isRegisterA)
-{
-    uint8 carry = isSetFlag(flagCarry) ? 0x80 : 0x00;
-    uint8 result = reg->GetValue();
-    ((result & 0x01) != 0) ? setFlag(flagCarry) : clearAllFlags();
-    result >>= 1;
-    result |= carry;
-    reg->SetValue(result);
-    if (!isRegisterA)
-    {
-        toggleZeroFlagFromResult(result);
-    }
+func opcodesRR(reg *EightBitReg, isRegisterA bool) {
+	var carry uint8
+	if isSetFlag(flagCarry) {
+		carry = 0x80
+	} else {
+		carry = 0x00
+	}
+	value := reg.GetValue()
+	if (value & 0x01) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := (value >> 1) | carry
+	reg.SetValue(result)
+	if !isRegisterA {
+		toggleZeroFlagFromResult(result)
+	}
 }
 
-func OPCodes_RR_HL()
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    uint8 carry = isSetFlag(flagCarry) ? 0x80 : 0x00;
-    ((m_iReadCache & 0x01) != 0) ? setFlag(flagCarry) : clearAllFlags();
-    m_iReadCache >>= 1;
-    m_iReadCache |= carry;
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
-    toggleZeroFlagFromResult(m_iReadCache);
+func opcodesRRHL() {
+	var carry uint8
+	if isSetFlag(flagCarry) {
+		carry = 0x80
+	} else {
+		carry = 0x00
+	}
+	address := hl.GetValue()
+	value := memory.Read(address)
+	if (value & 0x01) != 0 {
+		setFlag(flagCarry)
+	} else {
+		clearAllFlags()
+	}
+	result := (value >> 1) | carry
+	memory.Write(address, result)
+	toggleZeroFlagFromResult(result)
 }
 
-func OPCodes_BIT(EightBitRegister* reg, int bit)
-{
-    if (((reg->GetValue() >> bit) & 0x01) == 0)
-    {
-        toggleFlag(flagZero);
-    }
-    else
-    {
-        UntoggleFlag(flagZero);
-    }
-    toggleFlag(flagHalf);
-    UntoggleFlag(flagSub);
+func opcodesBIT(reg *EightBitReg, bit uint) {
+	if ((reg.GetValue() >> bit) & 0x01) == 0 {
+		toggleFlag(flagZero)
+	} else {
+		untoggleFlag(flagZero)
+	}
+	toggleFlag(flagHalf)
+	untoggleFlag(flagSub)
 }
 
-func OPCodes_BIT_HL(int bit)
-{
-    if (((m_pMemory->Read(HL.GetValue()) >> bit) & 0x01) == 0)
-    {
-        toggleFlag(flagZero);
-    }
-    else
-    {
-        UntoggleFlag(flagZero);
-    }
-    toggleFlag(flagHalf);
-    UntoggleFlag(flagSub);
+func opcodesBITHL(bit uint) {
+	if ((memory.Read(hl.GetValue()) >> bit) & 0x01) == 0 {
+		toggleFlag(flagZero)
+	} else {
+		untoggleFlag(flagZero)
+	}
+	toggleFlag(flagHalf)
+	untoggleFlag(flagSub)
 }
 
-func OPCodes_SET(EightBitRegister* reg, int bit)
-{
-    reg->SetValue(reg->GetValue() | (0x1 << bit));
+func opcodesSET(reg *EightBitReg, bit uint) {
+	reg.SetValue(reg.GetValue() | (0x01 << bit))
 }
 
-func OPCodes_SET_HL(int bit)
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    m_iReadCache |= (0x1 << bit);
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
+func opcodesSETHL(bit uint) {
+	address := hl.GetValue()
+	result := memory.Read(address)
+	result |= (0x01 << bit)
+	memory.Write(address, result)
 }
 
-func OPCodes_RES(EightBitRegister* reg, int bit)
-{
-    reg->SetValue(reg->GetValue() & (~(0x1 << bit)));
+func opcodesRES(reg *EightBitReg, bit uint) {
+	reg.SetValue(reg.GetValue() &^ (0x01 << bit))
 }
 
-func OPCodes_RES_HL(int bit)
-{
-    if (m_iAccurateOPCodeState == 1)
-    {
-        m_iReadCache = m_pMemory->Read(HL.GetValue());
-        return;
-    }
-    m_iReadCache &= ~(0x1 << bit);
-    m_pMemory->Write(HL.GetValue(), m_iReadCache);
+func opcodesRESHL(bit uint) {
+	address := hl.GetValue()
+	result := memory.Read(address)
+	result &= ^(0x01 << bit)
+	memory.Write(address, result)
 }
-*/

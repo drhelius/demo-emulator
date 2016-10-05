@@ -1,1570 +1,1507 @@
 package cpu
 
-/*
+import "github.com/drhelius/demo-emulator/gb/memory"
 
 func opcode0x00() {
-    // NOP
+	// NOP
 }
 
 func opcode0x01() {
-    // LD BC,nn
-    OPCodes_LD(bc.GetLowReg(), pc.GetValue());
-    pc.Increment();
-    OPCodes_LD(bc.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD BC,nn
+	opcodesLDFromAddress(bc.GetLowReg(), pc.GetValue())
+	pc.Increment()
+	opcodesLDFromAddress(bc.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x02() {
-    // LD (BC),A
-    OPCodes_LD(bc.GetValue(), af.GetHigh());
+	// LD (BC),A
+	opcodesLDToMemory(bc.GetValue(), af.GetHigh())
 }
 
 func opcode0x03() {
-    // INC BC
-    bc.Increment();
+	// INC BC
+	bc.Increment()
 }
 
 func opcode0x04() {
-    // INC B
-    OPCodes_INC(bc.GetHighRegister());
+	// INC B
+	opcodesINC(bc.GetHighReg())
 }
 
 func opcode0x05() {
-    // DEC B
-    OPCodes_DEC(bc.GetHighRegister());
+	// DEC B
+	opcodesDEC(bc.GetHighReg())
 }
 
 func opcode0x06() {
-    // LD B,n
-    OPCodes_LD(bc.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD B,n
+	opcodesLDFromAddress(bc.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x07() {
-    // RLCA
-    OPCodes_RLC(af.GetHighRegister(), true);
+	// RLCA
+	opcodesRLC(af.GetHighReg(), true)
 }
 
 func opcode0x08() {
-    // LD (nn),SP
-    u8 l = memory.Read(pc.GetValue());
-    pc.Increment();
-    u8 h = memory.Read(pc.GetValue());
-    pc.Increment();
-    u16 address = ((h << 8) + l);
-    memory.Write(address, sp.GetLow());
-    memory.Write(address + 1, sp.GetHigh());
+	// LD (nn),SP
+	l := uint16(memory.Read(pc.GetValue()))
+	pc.Increment()
+	h := uint16(memory.Read(pc.GetValue()))
+	pc.Increment()
+	address := ((h << 8) + l)
+	memory.Write(address, sp.GetLow())
+	memory.Write(address+1, sp.GetHigh())
 }
 
 func opcode0x09() {
-    // ADD HL,BC
-    OPCodes_ADD_HL(bc.GetValue());
+	// ADD HL,BC
+	opcodesADDHL(bc.GetValue())
 }
 
 func opcode0x0A() {
-    // LD A,(BC)
-    OPCodes_LD(af.GetHighRegister(), bc.GetValue());
+	// LD A,(BC)
+	opcodesLDFromAddress(af.GetHighReg(), bc.GetValue())
 }
 
 func opcode0x0B() {
-    // DEC BC
-    bc.Decrement();
+	// DEC BC
+	bc.Decrement()
 }
 
 func opcode0x0C() {
-    // INC C
-    OPCodes_INC(bc.GetLowReg());
+	// INC C
+	opcodesINC(bc.GetLowReg())
 }
 
 func opcode0x0D() {
-    // DEC C
-    OPCodes_DEC(bc.GetLowReg());
+	// DEC C
+	opcodesDEC(bc.GetLowReg())
 }
 
 func opcode0x0E() {
-    // LD C,n
-    OPCodes_LD(bc.GetLowReg(), pc.GetValue());
-    pc.Increment();
+	// LD C,n
+	opcodesLDFromAddress(bc.GetLowReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x0F() {
-    // RRCA
-    OPCodes_RRC(af.GetHighRegister(), true);
+	// RRCA
+	opcodesRRC(af.GetHighReg(), true)
 }
 
 func opcode0x10() {
-    // STOP
-    pc.Increment();
-
-    if (m_bCGB)
-    {
-        u8 current_key1 = memory.Read(0xFF4D);
-
-        if (IsSetBit(current_key1, 0))
-        {
-            m_bCGBSpeed = !m_bCGBSpeed;
-
-            if (m_bCGBSpeed)
-            {
-                m_iSpeedMultiplier = 1;
-                memory.Write(0xFF4D, 0x80);
-            }
-            else
-            {
-                m_iSpeedMultiplier = 0;
-                memory.Write(0xFF4D, 0x00);
-            }
-        }
-    }
+	// STOP
+	pc.Increment()
 }
 
 func opcode0x11() {
-    // LD DE,nn
-    OPCodes_LD(de.GetLowReg(), pc.GetValue());
-    pc.Increment();
-    OPCodes_LD(de.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD DE,nn
+	opcodesLDFromAddress(de.GetLowReg(), pc.GetValue())
+	pc.Increment()
+	opcodesLDFromAddress(de.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x12() {
-    // LD (DE),A
-    OPCodes_LD(de.GetValue(), af.GetHigh());
+	// LD (DE),A
+	opcodesLDToMemory(de.GetValue(), af.GetHigh())
 }
 
 func opcode0x13() {
-    // INC DE
-    de.Increment();
+	// INC DE
+	de.Increment()
 }
 
 func opcode0x14() {
-    // INC D
-    OPCodes_INC(de.GetHighRegister());
+	// INC D
+	opcodesINC(de.GetHighReg())
 }
 
 func opcode0x15() {
-    // DEC D
-    OPCodes_DEC(de.GetHighRegister());
+	// DEC D
+	opcodesDEC(de.GetHighReg())
 }
 
 func opcode0x16() {
-    // LD D,n
-    OPCodes_LD(de.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD D,n
+	opcodesLDFromAddress(de.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x17() {
-    // RLA
-    OPCodes_RL(af.GetHighRegister(), true);
+	// RLA
+	opcodesRL(af.GetHighReg(), true)
 }
 
 func opcode0x18() {
-    // JR n
-    pc.SetValue(pc.GetValue() + 1 + (static_cast<s8> (memory.Read(pc.GetValue()))));
+	// JR n
+	pc.SetValue(uint16(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue())))))
 }
 
 func opcode0x19() {
-    // ADD HL,DE
-    OPCodes_ADD_HL(de.GetValue());
+	// ADD HL,DE
+	opcodesADDHL(de.GetValue())
 }
 
 func opcode0x1A() {
-    // LD A,(DE)
-    OPCodes_LD(af.GetHighRegister(), de.GetValue());
+	// LD A,(DE)
+	opcodesLDFromAddress(af.GetHighReg(), de.GetValue())
 }
 
 func opcode0x1B() {
-    // DEC DE
-    de.Decrement();
+	// DEC DE
+	de.Decrement()
 }
 
 func opcode0x1C() {
-    // INC E
-    OPCodes_INC(de.GetLowReg());
+	// INC E
+	opcodesINC(de.GetLowReg())
 }
 
 func opcode0x1D() {
-    // DEC E
-    OPCodes_DEC(de.GetLowReg());
+	// DEC E
+	opcodesDEC(de.GetLowReg())
 }
 
 func opcode0x1E() {
-    // LD E,n
-    OPCodes_LD(de.GetLowReg(), pc.GetValue());
-    pc.Increment();
+	// LD E,n
+	opcodesLDFromAddress(de.GetLowReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x1F() {
-    // RRA
-    OPCodes_RR(af.GetHighRegister(), true);
+	// RRA
+	opcodesRR(af.GetHighReg(), true)
 }
 
 func opcode0x20() {
-    // JR NZ,n
-    if (!isSetFlag(flagZero))
-    {
-        pc.SetValue(pc.GetValue() + 1 + (static_cast<s8> (memory.Read(pc.GetValue()))));
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-    }
+	// JR NZ,n
+	if !isSetFlag(flagZero) {
+		pc.SetValue(uint16(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue())))))
+		branchTaken = true
+	} else {
+		pc.Increment()
+	}
 }
 
 func opcode0x21() {
-    // LD HL,nn
-    OPCodes_LD(hl.GetLowReg(), pc.GetValue());
-    pc.Increment();
-    OPCodes_LD(hl.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD HL,nn
+	opcodesLDFromAddress(hl.GetLowReg(), pc.GetValue())
+	pc.Increment()
+	opcodesLDFromAddress(hl.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x22() {
-    // LD (HLI),A
-    OPCodes_LD(hl.GetValue(), af.GetHigh());
-    hl.Increment();
+	// LD (HLI),A
+	opcodesLDToMemory(hl.GetValue(), af.GetHigh())
+	hl.Increment()
 }
 
 func opcode0x23() {
-    // INC HL
-    hl.Increment();
+	// INC HL
+	hl.Increment()
 }
 
 func opcode0x24() {
-    // INC H
-    OPCodes_INC(hl.GetHighRegister());
+	// INC H
+	opcodesINC(hl.GetHighReg())
 }
 
 func opcode0x25() {
-    // DEC H
-    OPCodes_DEC(hl.GetHighRegister());
+	// DEC H
+	opcodesDEC(hl.GetHighReg())
 }
 
 func opcode0x26() {
-    // LD H,n
-    OPCodes_LD(hl.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD H,n
+	opcodesLDFromAddress(hl.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x27() {
-    // DAA
-    int a = af.GetHigh();
+	// DAA
+	a := uint16(af.GetHigh())
 
-    if (!isSetFlag(flagSub))
-    {
-        if (isSetFlag(flagHalf) || ((a & 0xF) > 9))
-            a += 0x06;
+	if !isSetFlag(flagSub) {
+		if isSetFlag(flagHalf) || ((a & 0xF) > 9) {
+			a += 0x06
+		}
+		if isSetFlag(flagCarry) || (a > 0x9F) {
+			a += 0x60
+		}
+	} else {
+		if isSetFlag(flagHalf) {
+			a = (a - 6) & 0xFF
+		}
+		if isSetFlag(flagCarry) {
+			a -= 0x60
+		}
+	}
 
-        if (isSetFlag(flagCarry) || (a > 0x9F))
-            a += 0x60;
-    }
-    else
-    {
-        if (isSetFlag(flagHalf))
-            a = (a - 6) & 0xFF;
+	untoggleFlag(flagHalf)
+	untoggleFlag(flagZero)
 
-        if (isSetFlag(flagCarry))
-            a -= 0x60;
-    }
+	if (a & 0x100) == 0x100 {
+		toggleFlag(flagCarry)
+	}
 
-    untoggleFlag(flagHalf);
-    untoggleFlag(flagZero);
+	a &= 0xFF
 
-    if ((a & 0x100) == 0x100)
-        toggleFlag(flagCarry);
+	toggleZeroFlagFromResult(uint8(a))
 
-    a &= 0xFF;
-
-    ToggleZeroFlagFromResult(a);
-
-    af.SetHigh(a);
+	af.SetHigh(uint8(a))
 }
 
 func opcode0x28() {
-    // JR Z,n
-    if (isSetFlag(flagZero))
-    {
-        pc.SetValue(pc.GetValue() + 1 + (static_cast<s8> (memory.Read(pc.GetValue()))));
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-    }
+	// JR Z,n
+	if isSetFlag(flagZero) {
+		pc.SetValue(uint16(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue())))))
+		branchTaken = true
+	} else {
+		pc.Increment()
+	}
 }
 
 func opcode0x29() {
-    // ADD HL,HL
-    OPCodes_ADD_HL(hl.GetValue());
+	// ADD HL,HL
+	opcodesADDHL(hl.GetValue())
 }
 
 func opcode0x2A() {
-    // LD A,(HLI)
-    OPCodes_LD(af.GetHighRegister(), hl.GetValue());
-    hl.Increment();
+	// LD A,(HLI)
+	opcodesLDFromAddress(af.GetHighReg(), hl.GetValue())
+	hl.Increment()
 }
 
 func opcode0x2B() {
-    // DEC HL
-    hl.Decrement();
+	// DEC HL
+	hl.Decrement()
 }
 
 func opcode0x2C() {
-    // INC L
-    OPCodes_INC(hl.GetLowReg());
+	// INC L
+	opcodesINC(hl.GetLowReg())
 }
 
 func opcode0x2D() {
-    // DEC L
-    OPCodes_DEC(hl.GetLowReg());
+	// DEC L
+	opcodesDEC(hl.GetLowReg())
 }
 
 func opcode0x2E() {
-    // LD L,n
-    OPCodes_LD(hl.GetLowReg(), pc.GetValue());
-    pc.Increment();
+	// LD L,n
+	opcodesLDFromAddress(hl.GetLowReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x2F() {
-    // CPL
-    af.SetHigh(~af.GetHigh());
-    toggleFlag(flagHalf);
-    toggleFlag(flagSub);
+	// CPL
+	af.SetHigh(^af.GetHigh())
+	toggleFlag(flagHalf)
+	toggleFlag(flagSub)
 }
 
 func opcode0x30() {
-    // JR NC,n
-    if (!isSetFlag(flagCarry))
-    {
-        pc.SetValue(pc.GetValue() + 1 + (static_cast<s8> (memory.Read(pc.GetValue()))));
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-    }
+	// JR NC,n
+	if !isSetFlag(flagCarry) {
+		pc.SetValue(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue()))))
+		branchTaken = true
+	} else {
+		pc.Increment()
+	}
 }
 
 func opcode0x31() {
-    // LD SP,nn
-    sp.SetLow(memory.Read(pc.GetValue()));
-    pc.Increment();
-    sp.SetHigh(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// LD SP,nn
+	sp.SetLow(memory.Read(pc.GetValue()))
+	pc.Increment()
+	sp.SetHigh(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0x32() {
-    // LD (HLD), A
-    OPCodes_LD(hl.GetValue(), af.GetHigh());
-    hl.Decrement();
+	// LD (HLD), A
+	opcodesLDToMemory(hl.GetValue(), af.GetHigh())
+	hl.Decrement()
 }
 
 func opcode0x33() {
-    // INC SP
-    sp.Increment();
+	// INC SP
+	sp.Increment()
 }
 
 func opcode0x34() {
-    // INC (HL)
-    OPCodes_INC_HL();
+	// INC (HL)
+	opcodesINCHL()
 }
 
 func opcode0x35() {
-    // DEC (HL)
-    OPCodes_DEC_HL();
+	// DEC (HL)
+	opcodesDECHL()
 }
 
 func opcode0x36() {
-    // LD (HL),n
-    memory.Write(hl.GetValue(), memory.Read(pc.GetValue()));
-    pc.Increment();
+	// LD (HL),n
+	memory.Write(hl.GetValue(), memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0x37() {
-    // SCF
-    toggleFlag(flagCarry);
-    untoggleFlag(flagHalf);
-    untoggleFlag(flagSub);
+	// SCF
+	toggleFlag(flagCarry)
+	untoggleFlag(flagHalf)
+	untoggleFlag(flagSub)
 }
 
 func opcode0x38() {
-    // JR C,n
-    if (isSetFlag(flagCarry))
-    {
-        pc.SetValue(pc.GetValue() + 1 + (static_cast<s8> (memory.Read(pc.GetValue()))));
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-    }
+	// JR C,n
+	if isSetFlag(flagCarry) {
+		pc.SetValue(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue()))))
+		branchTaken = true
+	} else {
+		pc.Increment()
+	}
 }
 
 func opcode0x39() {
-    // ADD HL,SP
-    OPCodes_ADD_HL(sp.GetValue());
+	// ADD HL,SP
+	opcodesADDHL(sp.GetValue())
 }
 
 func opcode0x3A() {
-    // LD A,(HLD)
-    OPCodes_LD(af.GetHighRegister(), hl.GetValue());
-    hl.Decrement();
+	// LD A,(HLD)
+	opcodesLDFromAddress(af.GetHighReg(), hl.GetValue())
+	hl.Decrement()
 }
 
 func opcode0x3B() {
-    // DEC SP
-    sp.Decrement();
+	// DEC SP
+	sp.Decrement()
 }
 
 func opcode0x3C() {
-    // INC A
-    OPCodes_INC(af.GetHighRegister());
+	// INC A
+	opcodesINC(af.GetHighReg())
 }
 
 func opcode0x3D() {
-    // DEC A
-    OPCodes_DEC(af.GetHighRegister());
+	// DEC A
+	opcodesDEC(af.GetHighReg())
 
 }
 
 func opcode0x3E() {
-    // LD A,n
-    OPCodes_LD(af.GetHighRegister(), pc.GetValue());
-    pc.Increment();
+	// LD A,n
+	opcodesLDFromAddress(af.GetHighReg(), pc.GetValue())
+	pc.Increment()
 }
 
 func opcode0x3F() {
-    // CCF
-    flipFlag(flagCarry);
-    untoggleFlag(flagHalf);
-    untoggleFlag(flagSub);
+	// CCF
+	flipFlag(flagCarry)
+	untoggleFlag(flagHalf)
+	untoggleFlag(flagSub)
 }
 
 func opcode0x40() {
-    // LD B,B
-    OPCodes_LD(bc.GetHighRegister(), bc.GetHigh());
+	// LD B,B
+	opcodesLDFromValue(bc.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x41() {
-    // LD B,C
-    OPCodes_LD(bc.GetHighRegister(), bc.GetLow());
+	// LD B,C
+	opcodesLDFromValue(bc.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x42() {
-    // LD B,D
-    OPCodes_LD(bc.GetHighRegister(), de.GetHigh());
+	// LD B,D
+	opcodesLDFromValue(bc.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x43() {
-    // LD B,E
-    OPCodes_LD(bc.GetHighRegister(), de.GetLow());
+	// LD B,E
+	opcodesLDFromValue(bc.GetHighReg(), de.GetLow())
 }
 
 func opcode0x44() {
-    // LD B,H
-    OPCodes_LD(bc.GetHighRegister(), hl.GetHigh());
+	// LD B,H
+	opcodesLDFromValue(bc.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x45() {
-    // LD B,L
-    OPCodes_LD(bc.GetHighRegister(), hl.GetLow());
+	// LD B,L
+	opcodesLDFromValue(bc.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x46() {
-    // LD B,(HL)
-    OPCodes_LD(bc.GetHighRegister(), hl.GetValue());
+	// LD B,(HL)
+	opcodesLDFromAddress(bc.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x47() {
-    // LD B,A
-    OPCodes_LD(bc.GetHighRegister(), af.GetHigh());
+	// LD B,A
+	opcodesLDFromValue(bc.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x48() {
-    // LD C,B
-    OPCodes_LD(bc.GetLowReg(), bc.GetHigh());
+	// LD C,B
+	opcodesLDFromValue(bc.GetLowReg(), bc.GetHigh())
 }
 
 func opcode0x49() {
-    // LD C,C
-    OPCodes_LD(bc.GetLowReg(), bc.GetLow());
+	// LD C,C
+	opcodesLDFromValue(bc.GetLowReg(), bc.GetLow())
 }
 
 func opcode0x4A() {
-    // LD C,D
-    OPCodes_LD(bc.GetLowReg(), de.GetHigh());
+	// LD C,D
+	opcodesLDFromValue(bc.GetLowReg(), de.GetHigh())
 }
 
 func opcode0x4B() {
-    // LD C,E
-    OPCodes_LD(bc.GetLowReg(), de.GetLow());
+	// LD C,E
+	opcodesLDFromValue(bc.GetLowReg(), de.GetLow())
 }
 
 func opcode0x4C() {
-    // LD C,H
-    OPCodes_LD(bc.GetLowReg(), hl.GetHigh());
+	// LD C,H
+	opcodesLDFromValue(bc.GetLowReg(), hl.GetHigh())
 }
 
 func opcode0x4D() {
-    // LD C,L
-    OPCodes_LD(bc.GetLowReg(), hl.GetLow());
+	// LD C,L
+	opcodesLDFromValue(bc.GetLowReg(), hl.GetLow())
 }
 
 func opcode0x4E() {
-    // LD C,(HL)
-    OPCodes_LD(bc.GetLowReg(), hl.GetValue());
+	// LD C,(HL)
+	opcodesLDFromAddress(bc.GetLowReg(), hl.GetValue())
 }
 
 func opcode0x4F() {
-    // LD C,A
-    OPCodes_LD(bc.GetLowReg(), af.GetHigh());
+	// LD C,A
+	opcodesLDFromValue(bc.GetLowReg(), af.GetHigh())
 }
 
 func opcode0x50() {
-    // LD D,B
-    OPCodes_LD(de.GetHighRegister(), bc.GetHigh());
+	// LD D,B
+	opcodesLDFromValue(de.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x51() {
-    // LD D,C
-    OPCodes_LD(de.GetHighRegister(), bc.GetLow());
+	// LD D,C
+	opcodesLDFromValue(de.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x52() {
-    // LD D,D
-    OPCodes_LD(de.GetHighRegister(), de.GetHigh());
+	// LD D,D
+	opcodesLDFromValue(de.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x53() {
-    // LD D,E
-    OPCodes_LD(de.GetHighRegister(), de.GetLow());
+	// LD D,E
+	opcodesLDFromValue(de.GetHighReg(), de.GetLow())
 }
 
 func opcode0x54() {
-    // LD D,H
-    OPCodes_LD(de.GetHighRegister(), hl.GetHigh());
+	// LD D,H
+	opcodesLDFromValue(de.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x55() {
-    // LD D,L
-    OPCodes_LD(de.GetHighRegister(), hl.GetLow());
+	// LD D,L
+	opcodesLDFromValue(de.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x56() {
-    // LD D,(HL)
-    OPCodes_LD(de.GetHighRegister(), hl.GetValue());
+	// LD D,(HL)
+	opcodesLDFromAddress(de.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x57() {
-    // LD D,A
-    OPCodes_LD(de.GetHighRegister(), af.GetHigh());
+	// LD D,A
+	opcodesLDFromValue(de.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x58() {
-    // LD E,B
-    OPCodes_LD(de.GetLowReg(), bc.GetHigh());
+	// LD E,B
+	opcodesLDFromValue(de.GetLowReg(), bc.GetHigh())
 }
 
 func opcode0x59() {
-    // LD E,C
-    OPCodes_LD(de.GetLowReg(), bc.GetLow());
+	// LD E,C
+	opcodesLDFromValue(de.GetLowReg(), bc.GetLow())
 }
 
 func opcode0x5A() {
-    // LD E,D
-    OPCodes_LD(de.GetLowReg(), de.GetHigh());
+	// LD E,D
+	opcodesLDFromValue(de.GetLowReg(), de.GetHigh())
 }
 
 func opcode0x5B() {
-    // LD E,E
-    OPCodes_LD(de.GetLowReg(), de.GetLow());
+	// LD E,E
+	opcodesLDFromValue(de.GetLowReg(), de.GetLow())
 }
 
 func opcode0x5C() {
-    // LD E,H
-    OPCodes_LD(de.GetLowReg(), hl.GetHigh());
+	// LD E,H
+	opcodesLDFromValue(de.GetLowReg(), hl.GetHigh())
 }
 
 func opcode0x5D() {
-    // LD E,L
-    OPCodes_LD(de.GetLowReg(), hl.GetLow());
+	// LD E,L
+	opcodesLDFromValue(de.GetLowReg(), hl.GetLow())
 }
 
 func opcode0x5E() {
-    // LD E,(HL)
-    OPCodes_LD(de.GetLowReg(), hl.GetValue());
+	// LD E,(HL)
+	opcodesLDFromAddress(de.GetLowReg(), hl.GetValue())
 }
 
 func opcode0x5F() {
-    // LD E,A
-    OPCodes_LD(de.GetLowReg(), af.GetHigh());
+	// LD E,A
+	opcodesLDFromValue(de.GetLowReg(), af.GetHigh())
 }
 
 func opcode0x60() {
-    // LD H,B
-    OPCodes_LD(hl.GetHighRegister(), bc.GetHigh());
+	// LD H,B
+	opcodesLDFromValue(hl.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x61() {
-    // LD H,C
-    OPCodes_LD(hl.GetHighRegister(), bc.GetLow());
+	// LD H,C
+	opcodesLDFromValue(hl.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x62() {
-    // LD H,D
-    OPCodes_LD(hl.GetHighRegister(), de.GetHigh());
+	// LD H,D
+	opcodesLDFromValue(hl.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x63() {
-    // LD H,E
-    OPCodes_LD(hl.GetHighRegister(), de.GetLow());
+	// LD H,E
+	opcodesLDFromValue(hl.GetHighReg(), de.GetLow())
 }
 
 func opcode0x64() {
-    // LD H,H
-    OPCodes_LD(hl.GetHighRegister(), hl.GetHigh());
+	// LD H,H
+	opcodesLDFromValue(hl.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x65() {
-    // LD H,L
-    OPCodes_LD(hl.GetHighRegister(), hl.GetLow());
+	// LD H,L
+	opcodesLDFromValue(hl.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x66() {
-    // LD H,(HL)
-    OPCodes_LD(hl.GetHighRegister(), hl.GetValue());
+	// LD H,(HL)
+	opcodesLDFromAddress(hl.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x67() {
-    // LD H,A
-    OPCodes_LD(hl.GetHighRegister(), af.GetHigh());
+	// LD H,A
+	opcodesLDFromValue(hl.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x68() {
-    // LD L,B
-    OPCodes_LD(hl.GetLowReg(), bc.GetHigh());
+	// LD L,B
+	opcodesLDFromValue(hl.GetLowReg(), bc.GetHigh())
 }
 
 func opcode0x69() {
-    // LD L,C
-    OPCodes_LD(hl.GetLowReg(), bc.GetLow());
+	// LD L,C
+	opcodesLDFromValue(hl.GetLowReg(), bc.GetLow())
 }
 
 func opcode0x6A() {
-    // LD L,D
-    OPCodes_LD(hl.GetLowReg(), de.GetHigh());
+	// LD L,D
+	opcodesLDFromValue(hl.GetLowReg(), de.GetHigh())
 }
 
 func opcode0x6B() {
-    // LD L,E
-    OPCodes_LD(hl.GetLowReg(), de.GetLow());
+	// LD L,E
+	opcodesLDFromValue(hl.GetLowReg(), de.GetLow())
 }
 
 func opcode0x6C() {
-    // LD L,H
-    OPCodes_LD(hl.GetLowReg(), hl.GetHigh());
+	// LD L,H
+	opcodesLDFromValue(hl.GetLowReg(), hl.GetHigh())
 }
 
 func opcode0x6D() {
-    // LD L,L
-    OPCodes_LD(hl.GetLowReg(), hl.GetLow());
+	// LD L,L
+	opcodesLDFromValue(hl.GetLowReg(), hl.GetLow())
 }
 
 func opcode0x6E() {
-    // LD L,(HL)
-    OPCodes_LD(hl.GetLowReg(), hl.GetValue());
+	// LD L,(HL)
+	opcodesLDFromAddress(hl.GetLowReg(), hl.GetValue())
 }
 
 func opcode0x6F() {
-    // LD L,A
-    OPCodes_LD(hl.GetLowReg(), af.GetHigh());
+	// LD L,A
+	opcodesLDFromValue(hl.GetLowReg(), af.GetHigh())
 }
 
 func opcode0x70() {
-    // LD (HL),B
-    OPCodes_LD(hl.GetValue(), bc.GetHigh());
+	// LD (HL),B
+	opcodesLDToMemory(hl.GetValue(), bc.GetHigh())
 }
 
 func opcode0x71() {
-    // LD (HL),C
-    OPCodes_LD(hl.GetValue(), bc.GetLow());
+	// LD (HL),C
+	opcodesLDToMemory(hl.GetValue(), bc.GetLow())
 }
 
 func opcode0x72() {
-    // LD (HL),D
-    OPCodes_LD(hl.GetValue(), de.GetHigh());
+	// LD (HL),D
+	opcodesLDToMemory(hl.GetValue(), de.GetHigh())
 }
 
 func opcode0x73() {
-    // LD (HL),E
-    OPCodes_LD(hl.GetValue(), de.GetLow());
+	// LD (HL),E
+	opcodesLDToMemory(hl.GetValue(), de.GetLow())
 }
 
 func opcode0x74() {
-    // LD (HL),H
-    OPCodes_LD(hl.GetValue(), hl.GetHigh());
+	// LD (HL),H
+	opcodesLDToMemory(hl.GetValue(), hl.GetHigh())
 }
 
 func opcode0x75() {
-    // LD (HL),L
-    OPCodes_LD(hl.GetValue(), hl.GetLow());
+	// LD (HL),L
+	opcodesLDToMemory(hl.GetValue(), hl.GetLow())
 }
 
 func opcode0x76() {
-    // HALT
-    halt = true
+	// HALT
+	halt = true
 }
 
 func opcode0x77() {
-    // LD (HL),A
-    OPCodes_LD(hl.GetValue(), af.GetHigh());
+	// LD (HL),A
+	opcodesLDToMemory(hl.GetValue(), af.GetHigh())
 }
 
 func opcode0x78() {
-    // LD A,B
-    OPCodes_LD(af.GetHighRegister(), bc.GetHigh());
+	// LD A,B
+	opcodesLDFromValue(af.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x79() {
-    // LD A,C
-    OPCodes_LD(af.GetHighRegister(), bc.GetLow());
+	// LD A,C
+	opcodesLDFromValue(af.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x7A() {
-    // LD A,D
-    OPCodes_LD(af.GetHighRegister(), de.GetHigh());
+	// LD A,D
+	opcodesLDFromValue(af.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x7B() {
-    // LD A,E
-    OPCodes_LD(af.GetHighRegister(), de.GetLow());
+	// LD A,E
+	opcodesLDFromValue(af.GetHighReg(), de.GetLow())
 }
 
 func opcode0x7C() {
-    // LD A,H
-    OPCodes_LD(af.GetHighRegister(), hl.GetHigh());
+	// LD A,H
+	opcodesLDFromValue(af.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x7D() {
-    // LD A,L
-    OPCodes_LD(af.GetHighRegister(), hl.GetLow());
+	// LD A,L
+	opcodesLDFromValue(af.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x7E() {
-    // LD A,(HL)
-    OPCodes_LD(af.GetHighRegister(), hl.GetValue());
+	// LD A,(HL)
+	opcodesLDFromAddress(af.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x7F() {
-    // LD A,A
-    OPCodes_LD(af.GetHighRegister(), af.GetHigh());
+	// LD A,A
+	opcodesLDFromValue(af.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x80() {
-    // ADD A,B
-    OPCodes_ADD(bc.GetHigh());
+	// ADD A,B
+	opcodesADD(bc.GetHigh())
 }
 
 func opcode0x81() {
-    // ADD A,C
-    OPCodes_ADD(bc.GetLow());
+	// ADD A,C
+	opcodesADD(bc.GetLow())
 }
 
 func opcode0x82() {
-    // ADD A,D
-    OPCodes_ADD(de.GetHigh());
+	// ADD A,D
+	opcodesADD(de.GetHigh())
 }
 
 func opcode0x83() {
-    // ADD A,E
-    OPCodes_ADD(de.GetLow());
+	// ADD A,E
+	opcodesADD(de.GetLow())
 }
 
 func opcode0x84() {
-    // ADD A,H
-    OPCodes_ADD(hl.GetHigh());
+	// ADD A,H
+	opcodesADD(hl.GetHigh())
 }
 
 func opcode0x85() {
-    // ADD A,L
-    OPCodes_ADD(hl.GetLow());
+	// ADD A,L
+	opcodesADD(hl.GetLow())
 }
 
 func opcode0x86() {
-    // ADD A,(HL)
-    OPCodes_ADD(memory.Read(hl.GetValue()));
+	// ADD A,(HL)
+	opcodesADD(memory.Read(hl.GetValue()))
 }
 
 func opcode0x87() {
-    // ADD A,A
-    OPCodes_ADD(af.GetHigh());
+	// ADD A,A
+	opcodesADD(af.GetHigh())
 }
 
 func opcode0x88() {
-    // ADC A,B
-    OPCodes_ADC(bc.GetHigh());
+	// ADC A,B
+	opcodesADC(bc.GetHigh())
 }
 
 func opcode0x89() {
-    // ADC A,C
-    OPCodes_ADC(bc.GetLow());
+	// ADC A,C
+	opcodesADC(bc.GetLow())
 }
 
 func opcode0x8A() {
-    // ADC A,D
-    OPCodes_ADC(de.GetHigh());
+	// ADC A,D
+	opcodesADC(de.GetHigh())
 }
 
 func opcode0x8B() {
-    // ADC A,E
-    OPCodes_ADC(de.GetLow());
+	// ADC A,E
+	opcodesADC(de.GetLow())
 }
 
 func opcode0x8C() {
-    // ADC A,H
-    OPCodes_ADC(hl.GetHigh());
+	// ADC A,H
+	opcodesADC(hl.GetHigh())
 }
 
 func opcode0x8D() {
-    // ADC A,L
-    OPCodes_ADC(hl.GetLow());
+	// ADC A,L
+	opcodesADC(hl.GetLow())
 }
 
 func opcode0x8E() {
-    // ADC A,(HL)
-    OPCodes_ADC(memory.Read(hl.GetValue()));
+	// ADC A,(HL)
+	opcodesADC(memory.Read(hl.GetValue()))
 }
 
 func opcode0x8F() {
-    // ADC A,A
-    OPCodes_ADC(af.GetHigh());
+	// ADC A,A
+	opcodesADC(af.GetHigh())
 }
 
 func opcode0x90() {
-    // SUB B
-    OPCodes_SUB(bc.GetHigh());
+	// SUB B
+	opcodesSUB(bc.GetHigh())
 }
 
 func opcode0x91() {
-    // SUB C
-    OPCodes_SUB(bc.GetLow());
+	// SUB C
+	opcodesSUB(bc.GetLow())
 }
 
 func opcode0x92() {
-    // SUB D
-    OPCodes_SUB(de.GetHigh());
+	// SUB D
+	opcodesSUB(de.GetHigh())
 }
 
 func opcode0x93() {
-    // SUB E
-    OPCodes_SUB(de.GetLow());
+	// SUB E
+	opcodesSUB(de.GetLow())
 }
 
 func opcode0x94() {
-    // SUB H
-    OPCodes_SUB(hl.GetHigh());
+	// SUB H
+	opcodesSUB(hl.GetHigh())
 }
 
 func opcode0x95() {
-    // SUB L
-    OPCodes_SUB(hl.GetLow());
+	// SUB L
+	opcodesSUB(hl.GetLow())
 }
 
 func opcode0x96() {
-    // SUB (HL)
-    OPCodes_SUB(memory.Read(hl.GetValue()));
+	// SUB (HL)
+	opcodesSUB(memory.Read(hl.GetValue()))
 }
 
 func opcode0x97() {
-    // SUB A
-    OPCodes_SUB(af.GetHigh());
+	// SUB A
+	opcodesSUB(af.GetHigh())
 }
 
 func opcode0x98() {
-    // SBC B
-    OPCodes_SBC(bc.GetHigh());
+	// SBC B
+	opcodesSBC(bc.GetHigh())
 }
 
 func opcode0x99() {
-    // SBC C
-    OPCodes_SBC(bc.GetLow());
+	// SBC C
+	opcodesSBC(bc.GetLow())
 }
 
 func opcode0x9A() {
-    // SBC D
-    OPCodes_SBC(de.GetHigh());
+	// SBC D
+	opcodesSBC(de.GetHigh())
 }
 
 func opcode0x9B() {
-    // SBC E
-    OPCodes_SBC(de.GetLow());
+	// SBC E
+	opcodesSBC(de.GetLow())
 }
 
 func opcode0x9C() {
-    // SBC H
-    OPCodes_SBC(hl.GetHigh());
+	// SBC H
+	opcodesSBC(hl.GetHigh())
 }
 
 func opcode0x9D() {
-    // SBC L
-    OPCodes_SBC(hl.GetLow());
+	// SBC L
+	opcodesSBC(hl.GetLow())
 }
 
 func opcode0x9E() {
-    // SBC (HL)
-    OPCodes_SBC(memory.Read(hl.GetValue()));
+	// SBC (HL)
+	opcodesSBC(memory.Read(hl.GetValue()))
 }
 
 func opcode0x9F() {
-    // SBC A
-    OPCodes_SBC(af.GetHigh());
+	// SBC A
+	opcodesSBC(af.GetHigh())
 }
 
 func opcode0xA0() {
-    // AND B
-    OPCodes_AND(bc.GetHigh());
+	// AND B
+	opcodesAND(bc.GetHigh())
 }
 
 func opcode0xA1() {
-    // AND C
-    OPCodes_AND(bc.GetLow());
+	// AND C
+	opcodesAND(bc.GetLow())
 }
 
 func opcode0xA2() {
-    // AND D
-    OPCodes_AND(de.GetHigh());
+	// AND D
+	opcodesAND(de.GetHigh())
 }
 
 func opcode0xA3() {
-    // AND E
-    OPCodes_AND(de.GetLow());
+	// AND E
+	opcodesAND(de.GetLow())
 }
 
 func opcode0xA4() {
-    // AND H
-    OPCodes_AND(hl.GetHigh());
+	// AND H
+	opcodesAND(hl.GetHigh())
 }
 
 func opcode0xA5() {
-    // AND L
-    OPCodes_AND(hl.GetLow());
+	// AND L
+	opcodesAND(hl.GetLow())
 }
 
 func opcode0xA6() {
-    // AND (HL)
-    OPCodes_AND(memory.Read(hl.GetValue()));
+	// AND (HL)
+	opcodesAND(memory.Read(hl.GetValue()))
 }
 
 func opcode0xA7() {
-    // AND A
-    OPCodes_AND(af.GetHigh());
+	// AND A
+	opcodesAND(af.GetHigh())
 }
 
 func opcode0xA8() {
-    // XOR B
-    OPCodes_XOR(bc.GetHigh());
+	// XOR B
+	opcodesXOR(bc.GetHigh())
 }
 
 func opcode0xA9() {
-    // XOR C
-    OPCodes_XOR(bc.GetLow());
+	// XOR C
+	opcodesXOR(bc.GetLow())
 }
 
 func opcode0xAA() {
-    // XOR D
-    OPCodes_XOR(de.GetHigh());
+	// XOR D
+	opcodesXOR(de.GetHigh())
 }
 
 func opcode0xAB() {
-    // XOR E
-    OPCodes_XOR(de.GetLow());
+	// XOR E
+	opcodesXOR(de.GetLow())
 }
 
 func opcode0xAC() {
-    // XOR H
-    OPCodes_XOR(hl.GetHigh());
+	// XOR H
+	opcodesXOR(hl.GetHigh())
 }
 
 func opcode0xAD() {
-    // XOR L
-    OPCodes_XOR(hl.GetLow());
+	// XOR L
+	opcodesXOR(hl.GetLow())
 }
 
 func opcode0xAE() {
-    // XOR (HL)
-    OPCodes_XOR(memory.Read(hl.GetValue()));
+	// XOR (HL)
+	opcodesXOR(memory.Read(hl.GetValue()))
 }
 
 func opcode0xAF() {
-    // XOR A
-    OPCodes_XOR(af.GetHigh());
+	// XOR A
+	opcodesXOR(af.GetHigh())
 }
 
 func opcode0xB0() {
-    // OR B
-    OPCodes_OR(bc.GetHigh());
+	// OR B
+	opcodesOR(bc.GetHigh())
 }
 
 func opcode0xB1() {
-    // OR C
-    OPCodes_OR(bc.GetLow());
+	// OR C
+	opcodesOR(bc.GetLow())
 }
 
 func opcode0xB2() {
-    // OR D
-    OPCodes_OR(de.GetHigh());
+	// OR D
+	opcodesOR(de.GetHigh())
 }
 
 func opcode0xB3() {
-    // OR E
-    OPCodes_OR(de.GetLow());
+	// OR E
+	opcodesOR(de.GetLow())
 }
 
 func opcode0xB4() {
-    // OR H
-    OPCodes_OR(hl.GetHigh());
+	// OR H
+	opcodesOR(hl.GetHigh())
 }
 
 func opcode0xB5() {
-    // OR L
-    OPCodes_OR(hl.GetLow());
+	// OR L
+	opcodesOR(hl.GetLow())
 }
 
 func opcode0xB6() {
-    // OR (HL)
-    OPCodes_OR(memory.Read(hl.GetValue()));
+	// OR (HL)
+	opcodesOR(memory.Read(hl.GetValue()))
 }
 
 func opcode0xB7() {
-    // OR A
-    OPCodes_OR(af.GetHigh());
+	// OR A
+	opcodesOR(af.GetHigh())
 }
 
 func opcode0xB8() {
-    // CP B
-    OPCodes_CP(bc.GetHigh());
+	// CP B
+	opcodesCP(bc.GetHigh())
 }
 
 func opcode0xB9() {
-    // CP C
-    OPCodes_CP(bc.GetLow());
+	// CP C
+	opcodesCP(bc.GetLow())
 }
 
 func opcode0xBA() {
-    // CP D
-    OPCodes_CP(de.GetHigh());
+	// CP D
+	opcodesCP(de.GetHigh())
 }
 
 func opcode0xBB() {
-    // CP E
-    OPCodes_CP(de.GetLow());
+	// CP E
+	opcodesCP(de.GetLow())
 }
 
 func opcode0xBC() {
-    // CP H
-    OPCodes_CP(hl.GetHigh());
+	// CP H
+	opcodesCP(hl.GetHigh())
 }
 
 func opcode0xBD() {
-    // CP L
-    OPCodes_CP(hl.GetLow());
+	// CP L
+	opcodesCP(hl.GetLow())
 }
 
 func opcode0xBE() {
-    // CP (HL)
-    OPCodes_CP(memory.Read(hl.GetValue()));
+	// CP (HL)
+	opcodesCP(memory.Read(hl.GetValue()))
 }
 
 func opcode0xBF() {
-    // CP A
-    OPCodes_CP(af.GetHigh());
+	// CP A
+	opcodesCP(af.GetHigh())
 }
 
 func opcode0xC0() {
-    // RET NZ
-    if (!isSetFlag(flagZero))
-    {
-        stackPop(&PC);
-        branchTaken = true;
-    }
+	// RET NZ
+	if !isSetFlag(flagZero) {
+		stackPop(&pc)
+		branchTaken = true
+	}
 }
 
 func opcode0xC1() {
-    // POP BC
-    stackPop(&BC);
+	// POP BC
+	stackPop(&bc)
 }
 
 func opcode0xC2() {
-    // JP NZ,nn
-    if (!isSetFlag(flagZero))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// JP NZ,nn
+	if !isSetFlag(flagZero) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xC3() {
-    // JP nn
-    u8 l = memory.Read(pc.GetValue());
-    pc.Increment();
-    u8 h = memory.Read(pc.GetValue());
-    pc.SetHigh(h);
-    pc.SetLow(l);
+	// JP nn
+	l := memory.Read(pc.GetValue())
+	pc.Increment()
+	h := memory.Read(pc.GetValue())
+	pc.SetHigh(h)
+	pc.SetLow(l)
 }
 
 func opcode0xC4() {
-    // CALL NZ,nn
-    if (!isSetFlag(flagZero))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.Increment();
-        stackPush(&PC);
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// CALL NZ,nn
+	if !isSetFlag(flagZero) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.Increment()
+		stackPush(&pc)
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xC5() {
-    // PUSH BC
-    stackPush(&BC);
+	// PUSH BC
+	stackPush(&bc)
 }
 
 func opcode0xC6() {
-    // ADD A,n
-    OPCodes_ADD(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// ADD A,n
+	opcodesADD(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xC7() {
-    // RST 00H
-    stackPush(&PC);
-    pc.SetValue(0x0000);
+	// RST 00H
+	stackPush(&pc)
+	pc.SetValue(0x0000)
 }
 
 func opcode0xC8() {
-    // RET Z
-    if (isSetFlag(flagZero))
-    {
-        stackPop(&PC);
-        branchTaken = true;
-    }
+	// RET Z
+	if isSetFlag(flagZero) {
+		stackPop(&pc)
+		branchTaken = true
+	}
 }
 
 func opcode0xC9() {
-    // RET
-    stackPop(&PC);
+	// RET
+	stackPop(&pc)
 }
 
 func opcode0xCA() {
-    // JP Z,nn
-    if (isSetFlag(flagZero))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// JP Z,nn
+	if isSetFlag(flagZero) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xCB() {
-    // CB prefixed instruction
+	// CB prefixed instruction
 }
 
 func opcode0xCC() {
-    // CALL Z,nn
-    if (isSetFlag(flagZero))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.Increment();
-        stackPush(&PC);
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// CALL Z,nn
+	if isSetFlag(flagZero) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.Increment()
+		stackPush(&pc)
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xCD() {
-    // CALL nn
-    u8 l = memory.Read(pc.GetValue());
-    pc.Increment();
-    u8 h = memory.Read(pc.GetValue());
-    pc.Increment();
-    stackPush(&PC);
-    pc.SetHigh(h);
-    pc.SetLow(l);
+	// CALL nn
+	l := memory.Read(pc.GetValue())
+	pc.Increment()
+	h := memory.Read(pc.GetValue())
+	pc.Increment()
+	stackPush(&pc)
+	pc.SetHigh(h)
+	pc.SetLow(l)
 }
 
 func opcode0xCE() {
-    // ADC A,n
-    OPCodes_ADC(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// ADC A,n
+	opcodesADC(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xCF() {
-    // RST 08H
-    stackPush(&PC);
-    pc.SetValue(0x0008);
+	// RST 08H
+	stackPush(&pc)
+	pc.SetValue(0x0008)
 }
 
 func opcode0xD0() {
-    // RET NC
-    if (!isSetFlag(flagCarry))
-    {
-        stackPop(&PC);
-        branchTaken = true;
-    }
+	// RET NC
+	if !isSetFlag(flagCarry) {
+		stackPop(&pc)
+		branchTaken = true
+	}
 }
 
 func opcode0xD1() {
-    // POP DE
-    stackPop(&DE);
+	// POP DE
+	stackPop(&de)
 }
 
 func opcode0xD2() {
-    // JP NC,nn
-    if (!isSetFlag(flagCarry))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// JP NC,nn
+	if !isSetFlag(flagCarry) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xD3() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xD4() {
-    // CALL NC,nn
-    if (!isSetFlag(flagCarry))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.Increment();
-        stackPush(&PC);
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// CALL NC,nn
+	if !isSetFlag(flagCarry) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.Increment()
+		stackPush(&pc)
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xD5() {
-    // PUSH DE
-    stackPush(&DE);
+	// PUSH DE
+	stackPush(&de)
 }
 
 func opcode0xD6() {
-    // SUB n
-    OPCodes_SUB(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// SUB n
+	opcodesSUB(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xD7() {
-    // RST 10H
-    stackPush(&PC);
-    pc.SetValue(0x0010);
+	// RST 10H
+	stackPush(&pc)
+	pc.SetValue(0x0010)
 }
 
 func opcode0xD8() {
-    // RET C
-    if (isSetFlag(flagCarry))
-    {
-        stackPop(&PC);
-        branchTaken = true;
-    }
+	// RET C
+	if isSetFlag(flagCarry) {
+		stackPop(&pc)
+		branchTaken = true
+	}
 }
 
 func opcode0xD9() {
-    // RETI
-    stackPop(&PC);
-    ime = true;
+	// RETI
+	stackPop(&pc)
+	ime = true
 }
 
 func opcode0xDA() {
-    // JP C,nn
-    if (isSetFlag(flagCarry))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// JP C,nn
+	if isSetFlag(flagCarry) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xDB() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xDC() {
-    // CALL C,nn
-    if (isSetFlag(flagCarry))
-    {
-        u8 l = memory.Read(pc.GetValue());
-        pc.Increment();
-        u8 h = memory.Read(pc.GetValue());
-        pc.Increment();
-        stackPush(&PC);
-        pc.SetHigh(h);
-        pc.SetLow(l);
-        branchTaken = true;
-    }
-    else
-    {
-        pc.Increment();
-        pc.Increment();
-    }
+	// CALL C,nn
+	if isSetFlag(flagCarry) {
+		l := memory.Read(pc.GetValue())
+		pc.Increment()
+		h := memory.Read(pc.GetValue())
+		pc.Increment()
+		stackPush(&pc)
+		pc.SetHigh(h)
+		pc.SetLow(l)
+		branchTaken = true
+	} else {
+		pc.Increment()
+		pc.Increment()
+	}
 }
 
 func opcode0xDD() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xDE() {
-    // SBC n
-    OPCodes_SBC(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// SBC n
+	opcodesSBC(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xDF() {
-    // RST 18H
-    stackPush(&PC);
-    pc.SetValue(0x0018);
+	// RST 18H
+	stackPush(&pc)
+	pc.SetValue(0x0018)
 }
 
 func opcode0xE0() {
-    // LD (0xFF00+n),A
-    OPCodes_LD(static_cast<u16> (0xFF00 + memory.Read(pc.GetValue())), af.GetHigh());
-    pc.Increment();
+	// LD (0xFF00+n),A
+	opcodesLDToMemory(0xFF00+uint16(memory.Read(pc.GetValue())), af.GetHigh())
+	pc.Increment()
 }
 
 func opcode0xE1() {
-    // POP HL
-    stackPop(&HL);
+	// POP HL
+	stackPop(&hl)
 }
 
 func opcode0xE2() {
-    // LD (0xFF00+C),A
-    OPCodes_LD(static_cast<u16> (0xFF00 + bc.GetLow()), af.GetHigh());
+	// LD (0xFF00+C),A
+	opcodesLDToMemory(0xFF00+uint16(bc.GetLow()), af.GetHigh())
 }
 
 func opcode0xE3() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xE4() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xE5() {
-    // PUSH HL
-    stackPush(&HL);
+	// PUSH HL
+	stackPush(&hl)
 }
 
 func opcode0xE6() {
-    // AND n
-    OPCodes_AND(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// AND n
+	opcodesAND(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xE7() {
-    // RST 20H
-    stackPush(&PC);
-    pc.SetValue(0x0020);
+	// RST 20H
+	stackPush(&pc)
+	pc.SetValue(0x0020)
 }
 
 func opcode0xE8() {
-    // ADD SP,n
-    OPCodes_ADD_SP(static_cast<u8> (memory.Read(pc.GetValue())));
-    pc.Increment();
+	// ADD SP,n
+	opcodesADDSP(int8(memory.Read(pc.GetValue())))
+	pc.Increment()
 }
 
 func opcode0xE9() {
-    // JP (HL)
-    pc.SetValue(hl.GetValue());
+	// JP (HL)
+	pc.SetValue(hl.GetValue())
 }
 
 func opcode0xEA() {
-    // LD (nn),A
-    SixteenBitRegister tmp;
-    tmp.SetLow(memory.Read(pc.GetValue()));
-    pc.Increment();
-    tmp.SetHigh(memory.Read(pc.GetValue()));
-    pc.Increment();
-    OPCodes_LD(tmp.GetValue(), af.GetHigh());
+	// LD (nn),A
+	var tmp SixteenBitReg
+	tmp.SetLow(memory.Read(pc.GetValue()))
+	pc.Increment()
+	tmp.SetHigh(memory.Read(pc.GetValue()))
+	pc.Increment()
+	opcodesLDToMemory(tmp.GetValue(), af.GetHigh())
 }
 
 func opcode0xEB() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xEC() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xED() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xEE() {
-    // XOR n
-    OPCodes_XOR(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// XOR n
+	opcodesXOR(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xEF() {
-    // RST 28H
-    stackPush(&PC);
-    pc.SetValue(0x28);
+	// RST 28H
+	stackPush(&pc)
+	pc.SetValue(0x28)
 }
 
 func opcode0xF0() {
-    // LD A,(0xFF00+n)
-    OPCodes_LD(af.GetHighRegister(),
-            static_cast<u16> (0xFF00 + memory.Read(pc.GetValue())));
-    pc.Increment();
+	// LD A,(0xFF00+n)
+	opcodesLDFromAddress(af.GetHighReg(), 0xFF00+uint16(memory.Read(pc.GetValue())))
+	pc.Increment()
 }
 
 func opcode0xF1() {
-    // POP AF
-    stackPop(&AF);
-    af.SetLow(af.GetLow() & 0xF0);
+	// POP AF
+	stackPop(&af)
+	af.SetLow(af.GetLow() & 0xF0)
 }
 
 func opcode0xF2() {
-    // LD A,(C)
-    OPCodes_LD(af.GetHighRegister(), static_cast<u16> (0xFF00 + bc.GetLow()));
+	// LD A,(C)
+	opcodesLDFromAddress(af.GetHighReg(), 0xFF00+uint16(bc.GetLow()))
 }
 
 func opcode0xF3() {
-    // DI
-    ime = false;
-    m_iIMECycles = 0;
+	// DI
+	ime = false
 }
 
 func opcode0xF4() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xF5() {
-    // PUSH AF
-    stackPush(&AF);
+	// PUSH AF
+	stackPush(&af)
 }
 
 func opcode0xF6() {
-    // OR n
-    OPCodes_OR(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// OR n
+	opcodesOR(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xF7() {
-    // RST 30H
-    stackPush(&PC);
-    pc.SetValue(0x0030);
+	// RST 30H
+	stackPush(&pc)
+	pc.SetValue(0x0030)
 }
 
 func opcode0xF8() {
-    // LD HL,SP+n
-    s8 n = memory.Read(pc.GetValue());
-    u16 result = sp.GetValue() + n;
-    clearAllFlags();
-    if (((sp.GetValue() ^ n ^ result) & 0x100) == 0x100)
-        toggleFlag(flagCarry);
-    if (((sp.GetValue() ^ n ^ result) & 0x10) == 0x10)
-        toggleFlag(flagHalf);
-    hl.SetValue(result);
-    pc.Increment();
+	// LD HL,SP+n
+	n := int8(memory.Read(pc.GetValue()))
+	var result uint16 = sp.GetValue() + n
+	clearAllFlags()
+	if ((sp.GetValue() ^ n ^ result) & 0x100) == 0x100 {
+		toggleFlag(flagCarry)
+	}
+	if ((sp.GetValue() ^ n ^ result) & 0x10) == 0x10 {
+		toggleFlag(flagHalf)
+	}
+	hl.SetValue(result)
+	pc.Increment()
 }
 
 func opcode0xF9() {
-    // LD SP,HL
-    sp.SetValue(hl.GetValue());
+	// LD SP,HL
+	sp.SetValue(hl.GetValue())
 }
 
 func opcode0xFA() {
-    // LD A,(nn)
-    SixteenBitRegister tmp;
-    tmp.SetLow(memory.Read(pc.GetValue()));
-    pc.Increment();
-    tmp.SetHigh(memory.Read(pc.GetValue()));
-    pc.Increment();
-    OPCodes_LD(af.GetHighRegister(), tmp.GetValue());
+	// LD A,(nn)
+	var tmp SixteenBitReg
+	tmp.SetLow(memory.Read(pc.GetValue()))
+	pc.Increment()
+	tmp.SetHigh(memory.Read(pc.GetValue()))
+	pc.Increment()
+	opcodesLDFromAddress(af.GetHighReg(), tmp.GetValue())
 }
 
 func opcode0xFB() {
-    // EI
-    int ei_cycles = kOPCodeMachineCycles[0xFB] * AdjustedCycles(4);
-    m_iIMECycles = ei_cycles + 1;
+	// EI
+	ime = true
 }
 
 func opcode0xFC() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xFD() {
-    invalidOPCode();
+	invalidOPCode()
 }
 
 func opcode0xFE() {
-    // CP n
-    OPCodes_CP(memory.Read(pc.GetValue()));
-    pc.Increment();
+	// CP n
+	opcodesCP(memory.Read(pc.GetValue()))
+	pc.Increment()
 }
 
 func opcode0xFF() {
-    // RST 38H
-    stackPush(&PC);
-    pc.SetValue(0x0038);
+	// RST 38H
+	stackPush(&pc)
+	pc.SetValue(0x0038)
 }
-*/

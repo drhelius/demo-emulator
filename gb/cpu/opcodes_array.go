@@ -6,7 +6,6 @@ type opcodeFuncArray [256]opcodeFunc
 var opcodeArray opcodeFuncArray
 var opcodeCBArray opcodeFuncArray
 
-/*
 func init() {
 
 	opcodeArray[0x00] = opcode0x00
@@ -553,4 +552,3 @@ func init() {
 	opcodeCBArray[0xFE] = opcodeCB0xFE
 	opcodeCBArray[0xFF] = opcodeCB0xFF
 }
-*/

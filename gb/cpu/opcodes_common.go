@@ -356,7 +356,12 @@ func opcodesSRLHL() {
 	toggleZeroFlagFromResult(result)
 }
 
-func opcodesRLC(reg *EightBitReg, isRegisterA bool) {
+func opcodesRLC(reg *EightBitReg) {
+	opcodesRLCA(reg)
+	toggleZeroFlagFromResult(reg.GetValue())
+}
+
+func opcodesRLCA(reg *EightBitReg) {
 	value := reg.GetValue()
 	result := value << 1
 	if (value & 0x80) != 0 {
@@ -366,9 +371,6 @@ func opcodesRLC(reg *EightBitReg, isRegisterA bool) {
 		clearAllFlags()
 	}
 	reg.SetValue(result)
-	if !isRegisterA {
-		toggleZeroFlagFromResult(result)
-	}
 }
 
 func opcodesRLCHL() {
@@ -385,7 +387,12 @@ func opcodesRLCHL() {
 	toggleZeroFlagFromResult(result)
 }
 
-func opcodesRL(reg *EightBitReg, isRegisterA bool) {
+func opcodesRL(reg *EightBitReg) {
+	opcodesRLA(reg)
+	toggleZeroFlagFromResult(reg.GetValue())
+}
+
+func opcodesRLA(reg *EightBitReg) {
 	var carry uint8
 	if isSetFlag(flagCarry) {
 		carry = 0x01
@@ -400,9 +407,6 @@ func opcodesRL(reg *EightBitReg, isRegisterA bool) {
 	}
 	result := (value << 1) | carry
 	reg.SetValue(result)
-	if !isRegisterA {
-		toggleZeroFlagFromResult(result)
-	}
 }
 
 func opcodesRLHL() {
@@ -424,7 +428,12 @@ func opcodesRLHL() {
 	toggleZeroFlagFromResult(result)
 }
 
-func opcodesRRC(reg *EightBitReg, isRegisterA bool) {
+func opcodesRRC(reg *EightBitReg) {
+	opcodesRRC(reg)
+	toggleZeroFlagFromResult(reg.GetValue())
+}
+
+func opcodesRRCA(reg *EightBitReg) {
 	value := reg.GetValue()
 	result := value >> 1
 	if (value & 0x01) != 0 {
@@ -434,9 +443,6 @@ func opcodesRRC(reg *EightBitReg, isRegisterA bool) {
 		clearAllFlags()
 	}
 	reg.SetValue(result)
-	if !isRegisterA {
-		toggleZeroFlagFromResult(result)
-	}
 }
 
 func opcodesRRCHL() {
@@ -453,7 +459,12 @@ func opcodesRRCHL() {
 	toggleZeroFlagFromResult(result)
 }
 
-func opcodesRR(reg *EightBitReg, isRegisterA bool) {
+func opcodesRR(reg *EightBitReg) {
+	opcodesRRA(reg)
+	toggleZeroFlagFromResult(reg.GetValue())
+}
+
+func opcodesRRA(reg *EightBitReg) {
 	var carry uint8
 	if isSetFlag(flagCarry) {
 		carry = 0x80
@@ -468,9 +479,6 @@ func opcodesRR(reg *EightBitReg, isRegisterA bool) {
 	}
 	result := (value >> 1) | carry
 	reg.SetValue(result)
-	if !isRegisterA {
-		toggleZeroFlagFromResult(result)
-	}
 }
 
 func opcodesRRHL() {

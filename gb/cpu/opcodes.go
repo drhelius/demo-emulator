@@ -42,7 +42,7 @@ func opcode0x06() {
 
 func opcode0x07() {
 	// RLCA
-	opcodesRLC(af.GetHighReg(), true)
+	opcodesRLCA(af.GetHighReg())
 }
 
 func opcode0x08() {
@@ -89,7 +89,7 @@ func opcode0x0E() {
 
 func opcode0x0F() {
 	// RRCA
-	opcodesRRC(af.GetHighReg(), true)
+	opcodesRRCA(af.GetHighReg())
 }
 
 func opcode0x10() {
@@ -133,7 +133,7 @@ func opcode0x16() {
 
 func opcode0x17() {
 	// RLA
-	opcodesRL(af.GetHighReg(), true)
+	opcodesRLA(af.GetHighReg())
 }
 
 func opcode0x18() {
@@ -176,7 +176,7 @@ func opcode0x1E() {
 
 func opcode0x1F() {
 	// RRA
-	opcodesRR(af.GetHighReg(), true)
+	opcodesRRA(af.GetHighReg())
 }
 
 func opcode0x20() {

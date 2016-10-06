@@ -138,7 +138,9 @@ func opcode0x17() {
 
 func opcode0x18() {
 	// JR n
-	pc.SetValue(uint16(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue())))))
+	offset := int8(memory.Read(pc.GetValue()))
+	value := int32(pc.GetValue()) + 1 + int32(offset)
+	pc.SetValue(uint16(value))
 }
 
 func opcode0x19() {
@@ -180,7 +182,9 @@ func opcode0x1F() {
 func opcode0x20() {
 	// JR NZ,n
 	if !isSetFlag(flagZero) {
-		pc.SetValue(uint16(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue())))))
+		offset := int8(memory.Read(pc.GetValue()))
+		value := int32(pc.GetValue()) + 1 + int32(offset)
+		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
 		pc.Increment()
@@ -259,7 +263,9 @@ func opcode0x27() {
 func opcode0x28() {
 	// JR Z,n
 	if isSetFlag(flagZero) {
-		pc.SetValue(uint16(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue())))))
+		offset := int8(memory.Read(pc.GetValue()))
+		value := int32(pc.GetValue()) + 1 + int32(offset)
+		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
 		pc.Increment()
@@ -308,7 +314,9 @@ func opcode0x2F() {
 func opcode0x30() {
 	// JR NC,n
 	if !isSetFlag(flagCarry) {
-		pc.SetValue(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue()))))
+		offset := int8(memory.Read(pc.GetValue()))
+		value := int32(pc.GetValue()) + 1 + int32(offset)
+		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
 		pc.Increment()
@@ -360,7 +368,9 @@ func opcode0x37() {
 func opcode0x38() {
 	// JR C,n
 	if isSetFlag(flagCarry) {
-		pc.SetValue(pc.GetValue() + 1 + (int8(memory.Read(pc.GetValue()))))
+		offset := int8(memory.Read(pc.GetValue()))
+		value := int32(pc.GetValue()) + 1 + int32(offset)
+		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
 		pc.Increment()
@@ -1453,13 +1463,14 @@ func opcode0xF7() {
 
 func opcode0xF8() {
 	// LD HL,SP+n
-	n := int8(memory.Read(pc.GetValue()))
-	var result uint16 = sp.GetValue() + n
+	offset := int8(memory.Read(pc.GetValue()))
+	value := int32(sp.GetValue()) + int32(offset)
+	result := uint16(value)
 	clearAllFlags()
-	if ((sp.GetValue() ^ n ^ result) & 0x100) == 0x100 {
+	if ((sp.GetValue() ^ uint16(offset) ^ result) & 0x100) == 0x100 {
 		toggleFlag(flagCarry)
 	}
-	if ((sp.GetValue() ^ n ^ result) & 0x10) == 0x10 {
+	if ((sp.GetValue() ^ uint16(offset) ^ result) & 0x10) == 0x10 {
 		toggleFlag(flagHalf)
 	}
 	hl.SetValue(result)

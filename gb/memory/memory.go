@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"github.com/drhelius/demo-emulator/gb/input"
+	"github.com/drhelius/demo-emulator/gb/timer"
+	"github.com/drhelius/demo-emulator/gb/util"
+	"github.com/drhelius/demo-emulator/gb/video"
 )
 
 var (
@@ -62,106 +65,66 @@ func Write(addr uint16, value uint8) {
 		case 0xFF00:
 			// P1
 			input.Write(value)
-			break
 		case 0xFF04:
 			// DIV
-			//m_pProcessor->ResetDIVCycles();
+			memoryMap[addr] = 0x00
+			timer.DivCycles = 0
 			break
 		case 0xFF07:
 			// TAC
-			/*
-			   value &= 0x07;
-			   u8 current_tac = m_pMemory->Retrieve(0xFF07);
-			   if ((current_tac & 0x03) != (value & 0x03))
-			   {
-			       m_pProcessor->ResetTIMACycles();
-			   }
-			   m_pMemory->Load(address, value);
-			*/
+			value &= 0x07
+			currentTac := memoryMap[addr]
+			if (currentTac & 0x03) != (value & 0x03) {
+				memoryMap[0xFF05] = memoryMap[0xFF06]
+				timer.TimaCycles = 0
+			}
+			memoryMap[addr] = value
 		case 0xFF0F:
 			// IF
 			memoryMap[addr] = value & 0x1F
 		case 0xFF40:
 			// LCDC
-			/*
-			   u8 current_lcdc = m_pMemory->Retrieve(0xFF40);
-			   u8 new_lcdc = value;
-			   m_pMemory->Load(address, new_lcdc);
-			   if (!IsSetBit(current_lcdc, 5) && IsSetBit(new_lcdc, 5))
-			       m_pVideo->ResetWindowLine();
-			   if (IsSetBit(new_lcdc, 7))
-			       m_pVideo->EnableScreen();
-			   else
-			       m_pVideo->DisableScreen();
-			*/
+			currentLcdc := memoryMap[addr]
+			newLcdc := value
+			memoryMap[addr] = newLcdc
+			if !util.IsSetBit(currentLcdc, 5) && util.IsSetBit(newLcdc, 5) {
+				video.ResetWindowLine()
+			}
+			if util.IsSetBit(newLcdc, 7) {
+				video.EnableScreen()
+			} else {
+				video.DisableScreen()
+			}
 		case 0xFF41:
 			// STAT
-			/*
-			   u8 current_stat = m_pMemory->Retrieve(0xFF41) & 0x07;
-			   u8 new_stat = (value & 0x78) | (current_stat & 0x07);
-			   m_pMemory->Load(address, new_stat);
-			   u8 lcdc = m_pMemory->Retrieve(0xFF40);
-			   u8 signal = m_pVideo->GetIRQ48Signal();
-			   int mode = m_pVideo->GetCurrentStatusMode();
-			   signal &= ((new_stat >> 3) & 0x0F);
-			   m_pVideo->SetIRQ48Signal(signal);
-
-			   if (IsSetBit(lcdc, 7))
-			   {
-			       if (IsSetBit(new_stat, 3) && (mode == 0))
-			       {
-			           if (signal == 0)
-			           {
-			               m_pProcessor->RequestInterrupt(Processor::LCDSTAT_Interrupt);
-			           }
-			           signal = SetBit(signal, 0);
-			       }
-			       if (IsSetBit(new_stat, 4) && (mode == 1))
-			       {
-			           if (signal == 0)
-			           {
-			               m_pProcessor->RequestInterrupt(Processor::LCDSTAT_Interrupt);
-			           }
-			           signal = SetBit(signal, 1);
-			       }
-			       if (IsSetBit(new_stat, 5) && (mode == 2))
-			       {
-			           if (signal == 0)
-			           {
-			               m_pProcessor->RequestInterrupt(Processor::LCDSTAT_Interrupt);
-			           }
-			           //signal = SetBit(signal, 2);
-			       }
-			       m_pVideo->CompareLYToLYC();
-			   }
-			*/
+			currentStat := memoryMap[addr] & 0x07
+			newStat := (value & 0x78) | (currentStat & 0x07)
+			memoryMap[addr] = newStat
 		case 0xFF44:
 			// LY
-			/*
-			   u8 current_ly = m_pMemory->Retrieve(0xFF44);
-			   if (IsSetBit(current_ly, 7) && !IsSetBit(value, 7))
-			   {
-			       m_pVideo->DisableScreen();
-			   }
-			*/
+			currentLy := memoryMap[addr]
+			if util.IsSetBit(currentLy, 7) && !util.IsSetBit(value, 7) {
+				video.DisableScreen()
+			}
 		case 0xFF45:
-		/*
-		   // LYC
-		   u8 current_lyc = m_pMemory->Retrieve(0xFF45);
-		   if (current_lyc != value)
-		   {
-		       m_pMemory->Load(0xFF45, value);
-		       u8 lcdc = m_pMemory->Retrieve(0xFF40);
-		       if (IsSetBit(lcdc, 7))
-		       {
-		           m_pVideo->CompareLYToLYC();
-		       }
-		   }
-		*/
+			// LYC
+			currentLyc := memoryMap[addr]
+			if currentLyc != value {
+				memoryMap[addr] = value
+				lcdc := memoryMap[0xFF40]
+				if util.IsSetBit(lcdc, 7) {
+					video.CompareLYToLYC()
+				}
+			}
 		case 0xFF46:
 			// DMA
-			//m_pMemory->Load(address, value);
-			//m_pMemory->PerformDMA(value);
+			memoryMap[addr] = value
+			address := uint16(value) << 8
+			if address >= 0x8000 && address < 0xE000 {
+				for i := uint16(0x0000); i < 0x00A0; i++ {
+					memoryMap[0xFE00+i] = memoryMap[address+i]
+				}
+			}
 		case 0xFFFF:
 			// IE
 			memoryMap[addr] = value & 0x1F
@@ -169,7 +132,5 @@ func Write(addr uint16, value uint8) {
 		default:
 			memoryMap[addr] = value
 		}
-
 	}
-
 }

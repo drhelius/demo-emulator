@@ -1,6 +1,9 @@
 package cpu
 
-import "github.com/drhelius/demo-emulator/gb/memory"
+import (
+	"github.com/drhelius/demo-emulator/gb/memory"
+	"github.com/drhelius/demo-emulator/gb/timer"
+)
 
 // Interrupt types
 const (
@@ -31,8 +34,6 @@ var (
 	halt        bool
 	branchTaken bool
 	clockCycles uint32
-	divCycles   uint32
-	timaCycles  uint32
 )
 
 func init() {
@@ -159,12 +160,12 @@ func serveInterrupt(interrupt uint8) {
 }
 
 func updateTimers() {
-	divCycles += clockCycles
+	timer.DivCycles += clockCycles
 
 	var divCycleTreshold uint32 = 256
 
-	for divCycles >= divCycleTreshold {
-		divCycles -= divCycleTreshold
+	for timer.DivCycles >= divCycleTreshold {
+		timer.DivCycles -= divCycleTreshold
 		div := memory.Read(0xFF04)
 		div++
 		memory.Write(0xFF04, div)
@@ -174,7 +175,7 @@ func updateTimers() {
 
 	// if tima is running
 	if (tac & 0x04) != 0 {
-		timaCycles += clockCycles
+		timer.TimaCycles += clockCycles
 
 		var freq uint32
 
@@ -189,8 +190,8 @@ func updateTimers() {
 			freq = 256
 		}
 
-		for timaCycles >= freq {
-			timaCycles -= freq
+		for timer.TimaCycles >= freq {
+			timer.TimaCycles -= freq
 			tima := memory.Read(0xFF05)
 
 			if tima == 0xFF {

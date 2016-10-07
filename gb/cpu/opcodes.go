@@ -1,7 +1,5 @@
 package cpu
 
-import "github.com/drhelius/demo-emulator/gb/memory"
-
 func opcode0x00() {
 	// NOP
 }
@@ -47,13 +45,13 @@ func opcode0x07() {
 
 func opcode0x08() {
 	// LD (nn),SP
-	l := uint16(memory.Read(pc.GetValue()))
+	l := uint16(mem.Read(pc.GetValue()))
 	pc.Increment()
-	h := uint16(memory.Read(pc.GetValue()))
+	h := uint16(mem.Read(pc.GetValue()))
 	pc.Increment()
 	address := ((h << 8) + l)
-	memory.Write(address, sp.GetLow())
-	memory.Write(address+1, sp.GetHigh())
+	mem.Write(address, sp.GetLow())
+	mem.Write(address+1, sp.GetHigh())
 }
 
 func opcode0x09() {
@@ -138,7 +136,7 @@ func opcode0x17() {
 
 func opcode0x18() {
 	// JR n
-	offset := int8(memory.Read(pc.GetValue()))
+	offset := int8(mem.Read(pc.GetValue()))
 	value := int32(pc.GetValue()) + 1 + int32(offset)
 	pc.SetValue(uint16(value))
 }
@@ -182,7 +180,7 @@ func opcode0x1F() {
 func opcode0x20() {
 	// JR NZ,n
 	if !isSetFlag(flagZero) {
-		offset := int8(memory.Read(pc.GetValue()))
+		offset := int8(mem.Read(pc.GetValue()))
 		value := int32(pc.GetValue()) + 1 + int32(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
@@ -263,7 +261,7 @@ func opcode0x27() {
 func opcode0x28() {
 	// JR Z,n
 	if isSetFlag(flagZero) {
-		offset := int8(memory.Read(pc.GetValue()))
+		offset := int8(mem.Read(pc.GetValue()))
 		value := int32(pc.GetValue()) + 1 + int32(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
@@ -314,7 +312,7 @@ func opcode0x2F() {
 func opcode0x30() {
 	// JR NC,n
 	if !isSetFlag(flagCarry) {
-		offset := int8(memory.Read(pc.GetValue()))
+		offset := int8(mem.Read(pc.GetValue()))
 		value := int32(pc.GetValue()) + 1 + int32(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
@@ -325,9 +323,9 @@ func opcode0x30() {
 
 func opcode0x31() {
 	// LD SP,nn
-	sp.SetLow(memory.Read(pc.GetValue()))
+	sp.SetLow(mem.Read(pc.GetValue()))
 	pc.Increment()
-	sp.SetHigh(memory.Read(pc.GetValue()))
+	sp.SetHigh(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -354,7 +352,7 @@ func opcode0x35() {
 
 func opcode0x36() {
 	// LD (HL),n
-	memory.Write(hl.GetValue(), memory.Read(pc.GetValue()))
+	mem.Write(hl.GetValue(), mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -368,7 +366,7 @@ func opcode0x37() {
 func opcode0x38() {
 	// JR C,n
 	if isSetFlag(flagCarry) {
-		offset := int8(memory.Read(pc.GetValue()))
+		offset := int8(mem.Read(pc.GetValue()))
 		value := int32(pc.GetValue()) + 1 + int32(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
@@ -769,7 +767,7 @@ func opcode0x85() {
 
 func opcode0x86() {
 	// ADD A,(HL)
-	opcodesADD(memory.Read(hl.GetValue()))
+	opcodesADD(mem.Read(hl.GetValue()))
 }
 
 func opcode0x87() {
@@ -809,7 +807,7 @@ func opcode0x8D() {
 
 func opcode0x8E() {
 	// ADC A,(HL)
-	opcodesADC(memory.Read(hl.GetValue()))
+	opcodesADC(mem.Read(hl.GetValue()))
 }
 
 func opcode0x8F() {
@@ -849,7 +847,7 @@ func opcode0x95() {
 
 func opcode0x96() {
 	// SUB (HL)
-	opcodesSUB(memory.Read(hl.GetValue()))
+	opcodesSUB(mem.Read(hl.GetValue()))
 }
 
 func opcode0x97() {
@@ -889,7 +887,7 @@ func opcode0x9D() {
 
 func opcode0x9E() {
 	// SBC (HL)
-	opcodesSBC(memory.Read(hl.GetValue()))
+	opcodesSBC(mem.Read(hl.GetValue()))
 }
 
 func opcode0x9F() {
@@ -929,7 +927,7 @@ func opcode0xA5() {
 
 func opcode0xA6() {
 	// AND (HL)
-	opcodesAND(memory.Read(hl.GetValue()))
+	opcodesAND(mem.Read(hl.GetValue()))
 }
 
 func opcode0xA7() {
@@ -969,7 +967,7 @@ func opcode0xAD() {
 
 func opcode0xAE() {
 	// XOR (HL)
-	opcodesXOR(memory.Read(hl.GetValue()))
+	opcodesXOR(mem.Read(hl.GetValue()))
 }
 
 func opcode0xAF() {
@@ -1009,7 +1007,7 @@ func opcode0xB5() {
 
 func opcode0xB6() {
 	// OR (HL)
-	opcodesOR(memory.Read(hl.GetValue()))
+	opcodesOR(mem.Read(hl.GetValue()))
 }
 
 func opcode0xB7() {
@@ -1049,7 +1047,7 @@ func opcode0xBD() {
 
 func opcode0xBE() {
 	// CP (HL)
-	opcodesCP(memory.Read(hl.GetValue()))
+	opcodesCP(mem.Read(hl.GetValue()))
 }
 
 func opcode0xBF() {
@@ -1073,9 +1071,9 @@ func opcode0xC1() {
 func opcode0xC2() {
 	// JP NZ,nn
 	if !isSetFlag(flagZero) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.SetHigh(h)
 		pc.SetLow(l)
 		branchTaken = true
@@ -1087,9 +1085,9 @@ func opcode0xC2() {
 
 func opcode0xC3() {
 	// JP nn
-	l := memory.Read(pc.GetValue())
+	l := mem.Read(pc.GetValue())
 	pc.Increment()
-	h := memory.Read(pc.GetValue())
+	h := mem.Read(pc.GetValue())
 	pc.SetHigh(h)
 	pc.SetLow(l)
 }
@@ -1097,9 +1095,9 @@ func opcode0xC3() {
 func opcode0xC4() {
 	// CALL NZ,nn
 	if !isSetFlag(flagZero) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.Increment()
 		stackPush(&pc)
 		pc.SetHigh(h)
@@ -1118,7 +1116,7 @@ func opcode0xC5() {
 
 func opcode0xC6() {
 	// ADD A,n
-	opcodesADD(memory.Read(pc.GetValue()))
+	opcodesADD(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1144,9 +1142,9 @@ func opcode0xC9() {
 func opcode0xCA() {
 	// JP Z,nn
 	if isSetFlag(flagZero) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.SetHigh(h)
 		pc.SetLow(l)
 		branchTaken = true
@@ -1163,9 +1161,9 @@ func opcode0xCB() {
 func opcode0xCC() {
 	// CALL Z,nn
 	if isSetFlag(flagZero) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.Increment()
 		stackPush(&pc)
 		pc.SetHigh(h)
@@ -1179,9 +1177,9 @@ func opcode0xCC() {
 
 func opcode0xCD() {
 	// CALL nn
-	l := memory.Read(pc.GetValue())
+	l := mem.Read(pc.GetValue())
 	pc.Increment()
-	h := memory.Read(pc.GetValue())
+	h := mem.Read(pc.GetValue())
 	pc.Increment()
 	stackPush(&pc)
 	pc.SetHigh(h)
@@ -1190,7 +1188,7 @@ func opcode0xCD() {
 
 func opcode0xCE() {
 	// ADC A,n
-	opcodesADC(memory.Read(pc.GetValue()))
+	opcodesADC(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1216,9 +1214,9 @@ func opcode0xD1() {
 func opcode0xD2() {
 	// JP NC,nn
 	if !isSetFlag(flagCarry) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.SetHigh(h)
 		pc.SetLow(l)
 		branchTaken = true
@@ -1235,9 +1233,9 @@ func opcode0xD3() {
 func opcode0xD4() {
 	// CALL NC,nn
 	if !isSetFlag(flagCarry) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.Increment()
 		stackPush(&pc)
 		pc.SetHigh(h)
@@ -1256,7 +1254,7 @@ func opcode0xD5() {
 
 func opcode0xD6() {
 	// SUB n
-	opcodesSUB(memory.Read(pc.GetValue()))
+	opcodesSUB(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1283,9 +1281,9 @@ func opcode0xD9() {
 func opcode0xDA() {
 	// JP C,nn
 	if isSetFlag(flagCarry) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.SetHigh(h)
 		pc.SetLow(l)
 		branchTaken = true
@@ -1302,9 +1300,9 @@ func opcode0xDB() {
 func opcode0xDC() {
 	// CALL C,nn
 	if isSetFlag(flagCarry) {
-		l := memory.Read(pc.GetValue())
+		l := mem.Read(pc.GetValue())
 		pc.Increment()
-		h := memory.Read(pc.GetValue())
+		h := mem.Read(pc.GetValue())
 		pc.Increment()
 		stackPush(&pc)
 		pc.SetHigh(h)
@@ -1322,7 +1320,7 @@ func opcode0xDD() {
 
 func opcode0xDE() {
 	// SBC n
-	opcodesSBC(memory.Read(pc.GetValue()))
+	opcodesSBC(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1334,7 +1332,7 @@ func opcode0xDF() {
 
 func opcode0xE0() {
 	// LD (0xFF00+n),A
-	opcodesLDToMemory(0xFF00+uint16(memory.Read(pc.GetValue())), af.GetHigh())
+	opcodesLDToMemory(0xFF00+uint16(mem.Read(pc.GetValue())), af.GetHigh())
 	pc.Increment()
 }
 
@@ -1363,7 +1361,7 @@ func opcode0xE5() {
 
 func opcode0xE6() {
 	// AND n
-	opcodesAND(memory.Read(pc.GetValue()))
+	opcodesAND(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1375,7 +1373,7 @@ func opcode0xE7() {
 
 func opcode0xE8() {
 	// ADD SP,n
-	opcodesADDSP(int8(memory.Read(pc.GetValue())))
+	opcodesADDSP(int8(mem.Read(pc.GetValue())))
 	pc.Increment()
 }
 
@@ -1387,9 +1385,9 @@ func opcode0xE9() {
 func opcode0xEA() {
 	// LD (nn),A
 	var tmp SixteenBitReg
-	tmp.SetLow(memory.Read(pc.GetValue()))
+	tmp.SetLow(mem.Read(pc.GetValue()))
 	pc.Increment()
-	tmp.SetHigh(memory.Read(pc.GetValue()))
+	tmp.SetHigh(mem.Read(pc.GetValue()))
 	pc.Increment()
 	opcodesLDToMemory(tmp.GetValue(), af.GetHigh())
 }
@@ -1408,7 +1406,7 @@ func opcode0xED() {
 
 func opcode0xEE() {
 	// XOR n
-	opcodesXOR(memory.Read(pc.GetValue()))
+	opcodesXOR(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1420,7 +1418,7 @@ func opcode0xEF() {
 
 func opcode0xF0() {
 	// LD A,(0xFF00+n)
-	opcodesLDFromAddress(af.GetHighReg(), 0xFF00+uint16(memory.Read(pc.GetValue())))
+	opcodesLDFromAddress(af.GetHighReg(), 0xFF00+uint16(mem.Read(pc.GetValue())))
 	pc.Increment()
 }
 
@@ -1451,7 +1449,7 @@ func opcode0xF5() {
 
 func opcode0xF6() {
 	// OR n
-	opcodesOR(memory.Read(pc.GetValue()))
+	opcodesOR(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 
@@ -1463,7 +1461,7 @@ func opcode0xF7() {
 
 func opcode0xF8() {
 	// LD HL,SP+n
-	offset := int8(memory.Read(pc.GetValue()))
+	offset := int8(mem.Read(pc.GetValue()))
 	value := int32(sp.GetValue()) + int32(offset)
 	result := uint16(value)
 	clearAllFlags()
@@ -1485,9 +1483,9 @@ func opcode0xF9() {
 func opcode0xFA() {
 	// LD A,(nn)
 	var tmp SixteenBitReg
-	tmp.SetLow(memory.Read(pc.GetValue()))
+	tmp.SetLow(mem.Read(pc.GetValue()))
 	pc.Increment()
-	tmp.SetHigh(memory.Read(pc.GetValue()))
+	tmp.SetHigh(mem.Read(pc.GetValue()))
 	pc.Increment()
 	opcodesLDFromAddress(af.GetHighReg(), tmp.GetValue())
 }
@@ -1507,7 +1505,7 @@ func opcode0xFD() {
 
 func opcode0xFE() {
 	// CP n
-	opcodesCP(memory.Read(pc.GetValue()))
+	opcodesCP(mem.Read(pc.GetValue()))
 	pc.Increment()
 }
 

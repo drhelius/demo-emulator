@@ -6,7 +6,7 @@ import (
 
 	"github.com/drhelius/demo-emulator/gb/cpu"
 	"github.com/drhelius/demo-emulator/gb/input"
-	"github.com/drhelius/demo-emulator/gb/memory"
+	"github.com/drhelius/demo-emulator/gb/memoryimpl"
 	"github.com/drhelius/demo-emulator/gb/util"
 	"github.com/drhelius/demo-emulator/gb/video"
 )
@@ -57,7 +57,11 @@ func LoadROM(filePath string) {
 		panic("the size of the rom is not valid")
 	}
 
-	memory.SetupROM(data)
+	var m memoryimpl.Memory
+	m.Setup(data)
+	cpu.SetMem(&m)
+	video.SetMem(&m)
+
 	ready = true
 }
 

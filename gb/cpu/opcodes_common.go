@@ -1,10 +1,6 @@
 package cpu
 
-import (
-	"fmt"
-
-	"github.com/drhelius/demo-emulator/gb/memory"
-)
+import "fmt"
 
 func clearAllFlags() {
 	setFlag(flagNone)
@@ -38,15 +34,15 @@ func isSetFlag(flag uint8) bool {
 
 func stackPush(reg *SixteenBitReg) {
 	sp.Decrement()
-	memory.Write(sp.GetValue(), reg.GetHigh())
+	mem.Write(sp.GetValue(), reg.GetHigh())
 	sp.Decrement()
-	memory.Write(sp.GetValue(), reg.GetLow())
+	mem.Write(sp.GetValue(), reg.GetLow())
 }
 
 func stackPop(reg *SixteenBitReg) {
-	reg.SetLow(memory.Read(sp.GetValue()))
+	reg.SetLow(mem.Read(sp.GetValue()))
 	sp.Increment()
-	reg.SetHigh(memory.Read(sp.GetValue()))
+	reg.SetHigh(mem.Read(sp.GetValue()))
 	sp.Increment()
 }
 
@@ -59,11 +55,11 @@ func opcodesLDFromValue(reg1 *EightBitReg, reg2 uint8) {
 }
 
 func opcodesLDFromAddress(reg *EightBitReg, address uint16) {
-	reg.SetValue(memory.Read(address))
+	reg.SetValue(mem.Read(address))
 }
 
 func opcodesLDToMemory(address uint16, reg uint8) {
-	memory.Write(address, reg)
+	mem.Write(address, reg)
 }
 
 func opcodesOR(number uint8) {
@@ -115,9 +111,9 @@ func opcodesINC(reg *EightBitReg) {
 
 func opcodesINCHL() {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	result++
-	memory.Write(address, result)
+	mem.Write(address, result)
 	if isSetFlag(flagCarry) {
 		setFlag(flagCarry)
 	} else {
@@ -147,9 +143,9 @@ func opcodesDEC(reg *EightBitReg) {
 
 func opcodesDECHL() {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	result--
-	memory.Write(address, result)
+	mem.Write(address, result)
 	if isSetFlag(flagCarry) {
 		setFlag(flagCarry)
 	} else {
@@ -267,11 +263,11 @@ func opcodesSWAPReg(reg *EightBitReg) {
 
 func opcodesSWAPHL() {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	lowHalf := result & 0x0F
 	highHalf := (result >> 4) & 0x0F
 	result = (lowHalf << 4) + highHalf
-	memory.Write(address, result)
+	mem.Write(address, result)
 	clearAllFlags()
 	toggleZeroFlagFromResult(result)
 }
@@ -289,14 +285,14 @@ func opcodesSLA(reg *EightBitReg) {
 
 func opcodesSLAHL() {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	if (result & 0x80) != 0 {
 		setFlag(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result <<= 1
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -317,7 +313,7 @@ func opcodesSRA(reg *EightBitReg) {
 
 func opcodesSRAHL() {
 	address := hl.GetValue()
-	value := memory.Read(address)
+	value := mem.Read(address)
 	if (value & 0x01) != 0 {
 		setFlag(flagCarry)
 	} else {
@@ -327,7 +323,7 @@ func opcodesSRAHL() {
 	if (value & 0x80) != 0 {
 		result |= 0x80
 	}
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -345,14 +341,14 @@ func opcodesSRL(reg *EightBitReg) {
 
 func opcodesSRLHL() {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	if (result & 0x01) != 0 {
 		setFlag(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result >>= 1
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -375,7 +371,7 @@ func opcodesRLCA(reg *EightBitReg) {
 
 func opcodesRLCHL() {
 	address := hl.GetValue()
-	value := memory.Read(address)
+	value := mem.Read(address)
 	result := value << 1
 	if (value & 0x80) != 0 {
 		setFlag(flagCarry)
@@ -383,7 +379,7 @@ func opcodesRLCHL() {
 	} else {
 		clearAllFlags()
 	}
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -417,14 +413,14 @@ func opcodesRLHL() {
 		carry = 0x00
 	}
 	address := hl.GetValue()
-	value := memory.Read(address)
+	value := mem.Read(address)
 	if (value & 0x80) != 0 {
 		setFlag(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result := (value << 1) | carry
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -447,7 +443,7 @@ func opcodesRRCA(reg *EightBitReg) {
 
 func opcodesRRCHL() {
 	address := hl.GetValue()
-	value := memory.Read(address)
+	value := mem.Read(address)
 	result := value >> 1
 	if (value & 0x01) != 0 {
 		setFlag(flagCarry)
@@ -455,7 +451,7 @@ func opcodesRRCHL() {
 	} else {
 		clearAllFlags()
 	}
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -489,14 +485,14 @@ func opcodesRRHL() {
 		carry = 0x00
 	}
 	address := hl.GetValue()
-	value := memory.Read(address)
+	value := mem.Read(address)
 	if (value & 0x01) != 0 {
 		setFlag(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result := (value >> 1) | carry
-	memory.Write(address, result)
+	mem.Write(address, result)
 	toggleZeroFlagFromResult(result)
 }
 
@@ -511,7 +507,7 @@ func opcodesBIT(reg *EightBitReg, bit uint) {
 }
 
 func opcodesBITHL(bit uint) {
-	if ((memory.Read(hl.GetValue()) >> bit) & 0x01) == 0 {
+	if ((mem.Read(hl.GetValue()) >> bit) & 0x01) == 0 {
 		toggleFlag(flagZero)
 	} else {
 		untoggleFlag(flagZero)
@@ -526,9 +522,9 @@ func opcodesSET(reg *EightBitReg, bit uint) {
 
 func opcodesSETHL(bit uint) {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	result |= (0x01 << bit)
-	memory.Write(address, result)
+	mem.Write(address, result)
 }
 
 func opcodesRES(reg *EightBitReg, bit uint) {
@@ -537,7 +533,7 @@ func opcodesRES(reg *EightBitReg, bit uint) {
 
 func opcodesRESHL(bit uint) {
 	address := hl.GetValue()
-	result := memory.Read(address)
+	result := mem.Read(address)
 	result &= ^(0x01 << bit)
-	memory.Write(address, result)
+	mem.Write(address, result)
 }

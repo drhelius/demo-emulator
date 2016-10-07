@@ -1,8 +1,9 @@
 package cpu
 
 import (
+	"fmt"
+
 	"github.com/drhelius/demo-emulator/gb/memory"
-	"github.com/drhelius/demo-emulator/gb/timer"
 )
 
 // Interrupt types
@@ -34,6 +35,9 @@ var (
 	halt        bool
 	branchTaken bool
 	clockCycles uint32
+	divCycles   uint32
+	timaCycles  uint32
+	mem         memory.IMemory
 )
 
 func init() {
@@ -43,6 +47,11 @@ func init() {
 	bc.SetValue(0x0013)
 	de.SetValue(0x00D8)
 	hl.SetValue(0x014D)
+}
+
+// SetMem injects the memory impl
+func SetMem(m memory.IMemory) {
+	mem = m
 }
 
 // Tick runs a single instruction of the processor
@@ -59,7 +68,7 @@ func Tick() uint32 {
 	}
 
 	if !halt {
-		//fmt.Printf("-> PC: 0x%X  OP: 0x%X\n", pc.GetValue(), memory.Read(pc.GetValue()))
+		fmt.Printf("-> PC: 0x%X  OP: 0x%X\n", pc.GetValue(), mem.Read(pc.GetValue()))
 		serveInterrupt(interruptPending())
 		runOpcode(fetchOpcode())
 	}
@@ -71,11 +80,21 @@ func Tick() uint32 {
 
 // RequestInterrupt is used to raise a new interrupt
 func RequestInterrupt(interrupt uint8) {
-	memory.Write(0xFF0F, memory.Read(0xFF0F)|interrupt)
+	mem.Write(0xFF0F, mem.Read(0xFF0F)|interrupt)
+}
+
+// ResetDivCycles sets divCycles to 0
+func ResetDivCycles() {
+	divCycles = 0
+}
+
+// ResetTimaCycles sets timaCycles to 0
+func ResetTimaCycles() {
+	timaCycles = 0
 }
 
 func fetchOpcode() uint8 {
-	opcode := memory.Read(pc.GetValue())
+	opcode := mem.Read(pc.GetValue())
 	pc.Increment()
 	return opcode
 }
@@ -96,14 +115,14 @@ func runOpcode(opcode uint8) {
 }
 
 func interruptIsAboutToRaise() bool {
-	ieReg := memory.Read(0xFFFF)
-	ifReg := memory.Read(0xFF0F)
+	ieReg := mem.Read(0xFFFF)
+	ifReg := mem.Read(0xFF0F)
 	return (ifReg & ieReg & 0x1F) != 0
 }
 
 func interruptPending() uint8 {
-	ieReg := memory.Read(0xFFFF)
-	ifReg := memory.Read(0xFF0F)
+	ieReg := mem.Read(0xFFFF)
+	ifReg := mem.Read(0xFF0F)
 	ieIf := ieReg & ifReg
 
 	if (ieIf & 0x01) != 0 {
@@ -123,34 +142,34 @@ func interruptPending() uint8 {
 
 func serveInterrupt(interrupt uint8) {
 	if ime {
-		ifReg := memory.Read(0xFF0F)
+		ifReg := mem.Read(0xFF0F)
 		switch interrupt {
 		case InterruptVBlank:
-			memory.Write(0xFF0F, ifReg&0xFE)
+			mem.Write(0xFF0F, ifReg&0xFE)
 			ime = false
 			stackPush(&pc)
 			pc.SetValue(0x0040)
 			clockCycles += 20
 		case InterruptLCDSTAT:
-			memory.Write(0xFF0F, ifReg&0xFD)
+			mem.Write(0xFF0F, ifReg&0xFD)
 			ime = false
 			stackPush(&pc)
 			pc.SetValue(0x0048)
 			clockCycles += 20
 		case InterruptTimer:
-			memory.Write(0xFF0F, ifReg&0xFB)
+			mem.Write(0xFF0F, ifReg&0xFB)
 			ime = false
 			stackPush(&pc)
 			pc.SetValue(0x0050)
 			clockCycles += 20
 		case InterruptSerial:
-			memory.Write(0xFF0F, ifReg&0xF7)
+			mem.Write(0xFF0F, ifReg&0xF7)
 			ime = false
 			stackPush(&pc)
 			pc.SetValue(0x0058)
 			clockCycles += 20
 		case InterruptJoypad:
-			memory.Write(0xFF0F, ifReg&0xEF)
+			mem.Write(0xFF0F, ifReg&0xEF)
 			ime = false
 			stackPush(&pc)
 			pc.SetValue(0x0060)
@@ -160,22 +179,22 @@ func serveInterrupt(interrupt uint8) {
 }
 
 func updateTimers() {
-	timer.DivCycles += clockCycles
+	divCycles += clockCycles
 
 	var divCycleTreshold uint32 = 256
 
-	for timer.DivCycles >= divCycleTreshold {
-		timer.DivCycles -= divCycleTreshold
-		div := memory.Read(0xFF04)
+	for divCycles >= divCycleTreshold {
+		divCycles -= divCycleTreshold
+		div := mem.Read(0xFF04)
 		div++
-		memory.Write(0xFF04, div)
+		mem.Write(0xFF04, div)
 	}
 
-	tac := memory.Read(0xFF07)
+	tac := mem.Read(0xFF07)
 
 	// if tima is running
 	if (tac & 0x04) != 0 {
-		timer.TimaCycles += clockCycles
+		timaCycles += clockCycles
 
 		var freq uint32
 
@@ -190,18 +209,18 @@ func updateTimers() {
 			freq = 256
 		}
 
-		for timer.TimaCycles >= freq {
-			timer.TimaCycles -= freq
-			tima := memory.Read(0xFF05)
+		for timaCycles >= freq {
+			timaCycles -= freq
+			tima := mem.Read(0xFF05)
 
 			if tima == 0xFF {
-				tima = memory.Read(0xFF06)
+				tima = mem.Read(0xFF06)
 				RequestInterrupt(InterruptTimer)
 			} else {
 				tima++
 			}
 
-			memory.Write(0xFF05, tima)
+			mem.Write(0xFF05, tima)
 		}
 	}
 }

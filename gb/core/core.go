@@ -6,12 +6,12 @@ import (
 
 	"github.com/drhelius/demo-emulator/gb/cpu"
 	"github.com/drhelius/demo-emulator/gb/input"
+	"github.com/drhelius/demo-emulator/gb/memory"
 	"github.com/drhelius/demo-emulator/gb/util"
 	"github.com/drhelius/demo-emulator/gb/video"
 )
 
 var (
-	rom     []uint8
 	ready   bool
 	pallete = [12]uint8{
 		0x87, 0x96, 0x03,
@@ -57,7 +57,7 @@ func LoadROM(filePath string) {
 		panic("the size of the rom is not valid")
 	}
 
-	rom = data
+	memory.SetupROM(data)
 	ready = true
 }
 

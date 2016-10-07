@@ -58,8 +58,9 @@ func Tick() uint32 {
 	}
 
 	if !halt {
+		//fmt.Printf("-> PC: 0x%X  OP: 0x%X\n", pc.GetValue(), memory.Read(pc.GetValue()))
 		serveInterrupt(interruptPending())
-		//runOpcode(fetchOpcode())
+		runOpcode(fetchOpcode())
 	}
 
 	updateTimers()

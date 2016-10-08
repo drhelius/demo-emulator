@@ -425,7 +425,7 @@ func opcodesRLHL() {
 }
 
 func opcodesRRC(reg *EightBitReg) {
-	opcodesRRC(reg)
+	opcodesRRCA(reg)
 	toggleZeroFlagFromResult(reg.GetValue())
 }
 

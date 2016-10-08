@@ -13,7 +13,7 @@ import (
 	"github.com/drhelius/demo-emulator/gb/util"
 )
 
-const zoom = 4
+const zoom = 5
 
 var (
 	texture          uint32
@@ -159,13 +159,13 @@ func render() {
 	gl.MatrixMode(gl.MODELVIEW)
 
 	gl.Begin(gl.QUADS)
-	gl.TexCoord2d(0.0, 0.0)
-	gl.Vertex2d(0.0, 0.0)
-	gl.TexCoord2d(1.0, 0.0)
-	gl.Vertex2d(float64(viewportWidth), 0.0)
-	gl.TexCoord2d(1.0, 1.0)
-	gl.Vertex2d(float64(viewportWidth), float64(viewportHeight))
 	gl.TexCoord2d(0.0, 1.0)
+	gl.Vertex2d(0.0, 0.0)
+	gl.TexCoord2d(1.0, 1.0)
+	gl.Vertex2d(float64(viewportWidth), 0.0)
+	gl.TexCoord2d(1.0, 0.0)
+	gl.Vertex2d(float64(viewportWidth), float64(viewportHeight))
+	gl.TexCoord2d(0.0, 0.0)
 	gl.Vertex2d(0.0, float64(viewportHeight))
 	gl.End()
 

@@ -11,7 +11,7 @@ import (
 
 // Memory is the public type for Memory
 type Memory struct {
-	memoryMap []uint8 //= make([]uint8, 0x10000)
+	memoryMap []uint8
 	rom       []uint8
 }
 
@@ -89,13 +89,8 @@ func (m *Memory) Write(addr uint16, value uint8) {
 			m.memoryMap[addr] = value & 0x1F
 		case 0xFF40:
 			// LCDC
-			currentLcdc := m.memoryMap[addr]
-			newLcdc := value
-			m.memoryMap[addr] = newLcdc
-			if !util.IsSetBit(currentLcdc, 5) && util.IsSetBit(newLcdc, 5) {
-				video.ResetWindowLine()
-			}
-			if util.IsSetBit(newLcdc, 7) {
+			m.memoryMap[addr] = value
+			if util.IsSetBit(value, 7) {
 				video.EnableScreen()
 			} else {
 				video.DisableScreen()
@@ -133,9 +128,8 @@ func (m *Memory) Write(addr uint16, value uint8) {
 		case 0xFFFF:
 			// IE
 			m.memoryMap[addr] = value & 0x1F
-			break
-		default:
-			m.memoryMap[addr] = value
 		}
 	}
+
+	m.memoryMap[addr] = value
 }

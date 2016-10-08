@@ -1,10 +1,6 @@
 package cpu
 
-import (
-	"fmt"
-
-	"github.com/drhelius/demo-emulator/gb/memory"
-)
+import "github.com/drhelius/demo-emulator/gb/memory"
 
 // Interrupt types
 const (
@@ -68,7 +64,7 @@ func Tick() uint32 {
 	}
 
 	if !halt {
-		fmt.Printf("-> PC: 0x%X  OP: 0x%X\n", pc.GetValue(), mem.Read(pc.GetValue()))
+		//fmt.Printf("-> PC: 0x%X  OP: 0x%X\n", pc.GetValue(), mem.Read(pc.GetValue()))
 		serveInterrupt(interruptPending())
 		runOpcode(fetchOpcode())
 	}

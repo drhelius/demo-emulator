@@ -1,7 +1,7 @@
 package cpu
 
 import (
-	"github.com/drhelius/demo-emulator/gb/memory"
+	"github.com/drhelius/demo-emulator/gb/mapper"
 	"github.com/drhelius/demo-emulator/gb/util"
 )
 
@@ -30,7 +30,7 @@ var (
 	hl          SixteenBitReg
 	sp          SixteenBitReg
 	pc          SixteenBitReg
-	mem         memory.IMemory
+	mem         mapper.Mapper
 	ime         bool
 	halt        bool
 	branchTaken bool
@@ -50,8 +50,8 @@ func init() {
 	hl.SetValue(0x014D)
 }
 
-// SetMem injects the memory impl
-func SetMem(m memory.IMemory) {
+// SetMapper injects the memory impl
+func SetMapper(m mapper.Mapper) {
 	mem = m
 }
 

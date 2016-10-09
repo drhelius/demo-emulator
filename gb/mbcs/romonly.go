@@ -1,4 +1,4 @@
-package memoryimpl
+package mbcs
 
 import (
 	"fmt"
@@ -9,14 +9,14 @@ import (
 	"github.com/drhelius/demo-emulator/gb/video"
 )
 
-// Memory is the public type for Memory
-type Memory struct {
+// RomOnly is the public type for Memory
+type RomOnly struct {
 	memoryMap []uint8
 	rom       []uint8
 }
 
 // Setup Receives the rom data and intializes memory
-func (m *Memory) Setup(r []uint8) {
+func (m *RomOnly) Setup(r []uint8) {
 	m.rom = r
 	m.memoryMap = make([]uint8, 0x10000)
 
@@ -26,7 +26,7 @@ func (m *Memory) Setup(r []uint8) {
 }
 
 // Read returns the 8 bit value at the 16 bit address of the memory
-func (m *Memory) Read(addr uint16) uint8 {
+func (m *RomOnly) Read(addr uint16) uint8 {
 	if addr < 0x8000 {
 		// ROM
 		return m.rom[addr]
@@ -61,7 +61,7 @@ func (m *Memory) Read(addr uint16) uint8 {
 }
 
 // Write stores the 8 bit value at the 16 bit address of the memory
-func (m *Memory) Write(addr uint16, value uint8) {
+func (m *RomOnly) Write(addr uint16, value uint8) {
 
 	if addr < 0x8000 {
 		// ROM

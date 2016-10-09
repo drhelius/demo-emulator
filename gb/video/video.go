@@ -2,7 +2,7 @@ package video
 
 import (
 	"github.com/drhelius/demo-emulator/gb/cpu"
-	"github.com/drhelius/demo-emulator/gb/memory"
+	"github.com/drhelius/demo-emulator/gb/mapper"
 	"github.com/drhelius/demo-emulator/gb/util"
 )
 
@@ -16,7 +16,7 @@ var (
 	subStatusModeCycles uint32
 	lyCounter           uint8
 	vblankLine          uint8
-	mem                 memory.IMemory
+	mem                 mapper.Mapper
 )
 
 func init() {
@@ -25,8 +25,8 @@ func init() {
 	ScreenEnabled = true
 }
 
-// SetMem injects the memory impl
-func SetMem(m memory.IMemory) {
+// SetMapper injects the memory impl
+func SetMapper(m mapper.Mapper) {
 	mem = m
 }
 

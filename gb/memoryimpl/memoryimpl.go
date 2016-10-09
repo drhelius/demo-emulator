@@ -19,6 +19,10 @@ type Memory struct {
 func (m *Memory) Setup(r []uint8) {
 	m.rom = r
 	m.memoryMap = make([]uint8, 0x10000)
+
+	for i := 0; i < 0x100; i++ {
+		m.memoryMap[0xFF00+i] = initialValuesForFFXX[i]
+	}
 }
 
 // Read returns the 8 bit value at the 16 bit address of the memory
@@ -72,16 +76,16 @@ func (m *Memory) Write(addr uint16, value uint8) {
 			input.Write(value)
 		case 0xFF04:
 			// DIV
-			m.memoryMap[addr] = 0x00
 			cpu.ResetDivCycles()
+			m.memoryMap[addr] = 0x00
 			break
 		case 0xFF07:
 			// TAC
 			value &= 0x07
 			currentTac := m.memoryMap[addr]
 			if (currentTac & 0x03) != (value & 0x03) {
-				m.memoryMap[0xFF05] = m.memoryMap[0xFF06]
 				cpu.ResetTimaCycles()
+				m.memoryMap[0xFF05] = m.memoryMap[0xFF06]
 			}
 			m.memoryMap[addr] = value
 		case 0xFF0F:

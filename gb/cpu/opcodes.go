@@ -687,7 +687,21 @@ func opcode0x75() {
 
 func opcode0x76() {
 	// HALT
-	halt = true
+	if imeCycles > 0 {
+		// If EI is pending interrupts are triggered before Halt
+		imeCycles = 0
+		ime = true
+		pc.Decrement()
+	} else {
+		ifreg := mem.Read(0xFF0F)
+		iereg := mem.Read(0xFFFF)
+
+		halt = true
+
+		if !ime && ((ifreg & iereg & 0x1F) != 0) {
+			skipPCBug = true
+		}
+	}
 }
 
 func opcode0x77() {
@@ -1436,6 +1450,7 @@ func opcode0xF2() {
 func opcode0xF3() {
 	// DI
 	ime = false
+	imeCycles = 0
 }
 
 func opcode0xF4() {
@@ -1492,7 +1507,7 @@ func opcode0xFA() {
 
 func opcode0xFB() {
 	// EI
-	ime = true
+	imeCycles = (int(machineCycles[0xFB]) * 4) + 1
 }
 
 func opcode0xFC() {

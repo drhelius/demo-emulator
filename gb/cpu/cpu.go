@@ -1,6 +1,9 @@
 package cpu
 
-import "github.com/drhelius/demo-emulator/gb/memory"
+import (
+	"github.com/drhelius/demo-emulator/gb/memory"
+	"github.com/drhelius/demo-emulator/gb/util"
+)
 
 // Interrupt types
 const (
@@ -27,13 +30,15 @@ var (
 	hl          SixteenBitReg
 	sp          SixteenBitReg
 	pc          SixteenBitReg
+	mem         memory.IMemory
 	ime         bool
 	halt        bool
 	branchTaken bool
 	clockCycles uint32
 	divCycles   uint32
 	timaCycles  uint32
-	mem         memory.IMemory
+	imeCycles   int
+	skipPCBug   bool
 )
 
 func init() {
@@ -71,6 +76,14 @@ func Tick() uint32 {
 
 	updateTimers()
 
+	if imeCycles > 0 {
+		imeCycles -= int(clockCycles)
+		if imeCycles <= 0 {
+			imeCycles = 0
+			ime = true
+		}
+	}
+
 	return clockCycles
 }
 
@@ -91,7 +104,11 @@ func ResetTimaCycles() {
 
 func fetchOpcode() uint8 {
 	opcode := mem.Read(pc.GetValue())
-	pc.Increment()
+	if skipPCBug {
+		skipPCBug = false
+	} else {
+		pc.Increment()
+	}
 	return opcode
 }
 
@@ -99,13 +116,14 @@ func runOpcode(opcode uint8) {
 	if opcode == 0xCB {
 		opcode = fetchOpcode()
 		opcodeCBArray[opcode]()
-		clockCycles += machineCyclesCB[opcode]
+		clockCycles += machineCyclesCB[opcode] * 4
 	} else {
 		opcodeArray[opcode]()
 		if branchTaken {
-			clockCycles += machineCyclesBranched[opcode]
+			branchTaken = false
+			clockCycles += machineCyclesBranched[opcode] * 4
 		} else {
-			clockCycles += machineCycles[opcode]
+			clockCycles += machineCycles[opcode] * 4
 		}
 	}
 }
@@ -121,15 +139,16 @@ func interruptPending() uint8 {
 	ifReg := mem.Read(0xFF0F)
 	ieIf := ieReg & ifReg
 
-	if (ieIf & 0x01) != 0 {
+	switch {
+	case (ieIf & 0x01) != 0:
 		return InterruptVBlank
-	} else if (ieIf & 0x02) != 0 {
+	case (ieIf & 0x02) != 0:
 		return InterruptLCDSTAT
-	} else if (ieIf & 0x04) != 0 {
+	case (ieIf & 0x04) != 0:
 		return InterruptTimer
-	} else if (ieIf & 0x08) != 0 {
+	case (ieIf & 0x08) != 0:
 		return InterruptSerial
-	} else if (ieIf & 0x10) != 0 {
+	case (ieIf & 0x10) != 0:
 		return InterruptJoypad
 	}
 
@@ -177,10 +196,8 @@ func serveInterrupt(interrupt uint8) {
 func updateTimers() {
 	divCycles += clockCycles
 
-	var divCycleTreshold uint32 = 256
-
-	for divCycles >= divCycleTreshold {
-		divCycles -= divCycleTreshold
+	for divCycles >= 256 {
+		divCycles -= 256
 		div := mem.Read(0xFF04)
 		div++
 		mem.Write(0xFF04, div)
@@ -189,7 +206,7 @@ func updateTimers() {
 	tac := mem.Read(0xFF07)
 
 	// if tima is running
-	if (tac & 0x04) != 0 {
+	if util.IsSetBit(tac, 2) {
 		timaCycles += clockCycles
 
 		var freq uint32

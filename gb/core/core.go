@@ -6,6 +6,7 @@ import (
 
 	"github.com/drhelius/demo-emulator/gb/cpu"
 	"github.com/drhelius/demo-emulator/gb/input"
+	"github.com/drhelius/demo-emulator/gb/mapper"
 	"github.com/drhelius/demo-emulator/gb/mbcs"
 	"github.com/drhelius/demo-emulator/gb/util"
 	"github.com/drhelius/demo-emulator/gb/video"
@@ -42,7 +43,7 @@ func RunToVBlank(colorFrameBuffer []uint8) {
 // This fucntion must be called before running RunToVBlank
 func LoadROM(filePath string) {
 
-	fmt.Printf("loading rom %s\n", filePath)
+	fmt.Printf("loading rom \"%s\" ...\n", filePath)
 
 	data, err := ioutil.ReadFile(filePath)
 
@@ -52,15 +53,41 @@ func LoadROM(filePath string) {
 
 	fmt.Println("load rom ok")
 
-	// if not a 32KB rom
-	if len(data) != 32768 {
-		panic("the size of the rom is not valid")
+	cartType := data[0x147]
+	var m mapper.Mapper
+
+	switch cartType {
+	case 0x00:
+		// NO MBC
+		fallthrough
+	case 0x08:
+		// ROM
+		// SRAM
+		fallthrough
+	case 0x09:
+		// ROM
+		// SRAM
+		// BATT
+		m = new(mbcs.RomOnly)
+	case 0x01:
+		// MBC1
+		fallthrough
+	case 0x02:
+		// MBC1
+		// SRAM
+		fallthrough
+	case 0x03:
+		// MBC1
+		// SRAM
+		// BATT
+		m = new(mbcs.MBC1)
+	default:
+		panic(fmt.Sprintf("Cartridge type not supported: %d", cartType))
 	}
 
-	var m mbcs.RomOnly
 	m.Setup(data)
-	cpu.SetMapper(&m)
-	video.SetMapper(&m)
+	cpu.SetMapper(m)
+	video.SetMapper(m)
 
 	ready = true
 }

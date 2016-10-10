@@ -41,15 +41,13 @@ func RunToVBlank(colorFrameBuffer []uint8) {
 // This fucntion must be called before running RunToVBlank
 func LoadROM(filePath string) {
 
-	fmt.Printf("loading rom \"%s\" ...\n", filePath)
+	fmt.Printf("loading rom \"%s\"...\n", filePath)
 
 	data, err := ioutil.ReadFile(filePath)
 
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("load rom ok")
 
 	cartType := data[0x147]
 	var m mapper.Mapper
@@ -67,6 +65,7 @@ func LoadROM(filePath string) {
 		// SRAM
 		// BATT
 		m = new(mbcs.RomOnly)
+		fmt.Println("is a ROM only cartridge")
 	case 0x01:
 		// MBC1
 		fallthrough
@@ -79,6 +78,7 @@ func LoadROM(filePath string) {
 		// SRAM
 		// BATT
 		m = new(mbcs.MBC1)
+		fmt.Println("is a MBC1 based cartridge")
 	default:
 		panic(fmt.Sprintf("Cartridge type not supported: %d", cartType))
 	}

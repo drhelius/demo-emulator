@@ -1,8 +1,6 @@
 package mbcs
 
 import (
-	"fmt"
-
 	"github.com/drhelius/demo-emulator/gb/cpu"
 	"github.com/drhelius/demo-emulator/gb/input"
 	"github.com/drhelius/demo-emulator/gb/util"
@@ -79,7 +77,6 @@ func WriteIO(addr uint16, value uint8, mem []uint8) {
 		mem[addr] = value
 	case 0xFF44:
 		// LY
-		fmt.Printf("write to LY %d\n", value)
 		currentLy := mem[addr]
 		if util.IsSetBit(currentLy, 7) && !util.IsSetBit(value, 7) {
 			video.DisableScreen()

@@ -54,31 +54,23 @@ func LoadROM(filePath string) {
 
 	switch cartType {
 	case 0x00:
-		// NO MBC
-		fallthrough
-	case 0x08:
-		// ROM
-		// SRAM
-		fallthrough
-	case 0x09:
-		// ROM
-		// SRAM
-		// BATT
+		fmt.Println("ROM")
 		m = new(mbcs.RomOnly)
-		fmt.Println("is a ROM only cartridge")
+	case 0x08:
+		fmt.Println("ROM + SRAM")
+		m = new(mbcs.RomOnly)
+	case 0x09:
+		fmt.Println("ROM + SRAM + BATT")
+		m = new(mbcs.RomOnly)
 	case 0x01:
-		// MBC1
-		fallthrough
-	case 0x02:
-		// MBC1
-		// SRAM
-		fallthrough
-	case 0x03:
-		// MBC1
-		// SRAM
-		// BATT
+		fmt.Println("MBC1")
 		m = new(mbcs.MBC1)
-		fmt.Println("is a MBC1 based cartridge")
+	case 0x02:
+		fmt.Println("MBC1 + SRAM")
+		m = new(mbcs.MBC1)
+	case 0x03:
+		fmt.Println("MBC1 + SRAM + BATT")
+		m = new(mbcs.MBC1)
 	default:
 		panic(fmt.Sprintf("Cartridge type not supported: %d", cartType))
 	}

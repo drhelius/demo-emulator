@@ -38,7 +38,6 @@ func (m *RomOnly) Read(addr uint16) uint8 {
 		// IO Registers
 		return ReadIO(addr, m.memoryMap)
 	}
-
 	return m.memoryMap[addr]
 }
 
@@ -48,6 +47,8 @@ func (m *RomOnly) Write(addr uint16, value uint8) {
 	case addr < 0x8000:
 		// ROM
 		fmt.Printf("** Attempting to write on ROM address %X %X\n", addr, value)
+	case (addr >= 0xC000) && (addr < 0xFE00):
+		WriteCommon(addr, value, m.memoryMap)
 	case addr >= 0xFF00:
 		// IO Registers
 		WriteIO(addr, value, m.memoryMap)

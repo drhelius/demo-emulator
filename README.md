@@ -10,6 +10,11 @@ This is a Nintendo Game Boy emulator written in Go for demonstration purposes on
 Follow me on Twitter for updates: http://twitter.com/drhelius
 
 ----------
+``` 
+go get github.com/drhelius/demo-emulator
+$GOPATH/bin/demo-emulator -rom your_rom.gb
+``` 
+----------
 
 License
 -------

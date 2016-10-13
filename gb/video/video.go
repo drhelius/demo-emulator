@@ -53,6 +53,10 @@ func Tick(cycles uint32) bool {
 					vblankLine = 0
 					subStatusModeCycles = statusModeCycles
 					cpu.RequestInterrupt(cpu.InterruptVBlank)
+					stat := mem.GetMemoryMap()[0xFF41]
+					if util.IsSetBit(stat, 4) {
+						cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
+					}
 					vblank = true
 				}
 
@@ -83,6 +87,10 @@ func Tick(cycles uint32) bool {
 				statusModeCycles -= 4560
 				statusMode = 2
 				updateStatRegister()
+				stat := mem.GetMemoryMap()[0xFF41]
+				if util.IsSetBit(stat, 5) {
+					cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
+				}
 			}
 		case 2:
 			// During searching OAM RAM
@@ -98,6 +106,10 @@ func Tick(cycles uint32) bool {
 				statusMode = 0
 				scanLine(lyCounter)
 				updateStatRegister()
+				stat := mem.GetMemoryMap()[0xFF41]
+				if util.IsSetBit(stat, 3) {
+					cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
+				}
 			}
 		}
 	}

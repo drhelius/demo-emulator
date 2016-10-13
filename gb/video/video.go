@@ -58,6 +58,11 @@ func Tick(cycles uint32) bool {
 						cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
 					}
 					vblank = true
+				} else {
+					stat := mem.GetMemoryMap()[0xFF41]
+					if util.IsSetBit(stat, 5) {
+						cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
+					}
 				}
 
 				updateStatRegister()

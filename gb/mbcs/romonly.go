@@ -51,7 +51,7 @@ func (m *RomOnly) Write(addr uint16, value uint8) {
 		WriteCommon(addr, value, m.memoryMap)
 	case addr >= 0xFF00:
 		// IO Registers
-		WriteIO(addr, value, m.memoryMap)
+		WriteIO(addr, value, m.memoryMap, m)
 	default:
 		m.memoryMap[addr] = value
 	}

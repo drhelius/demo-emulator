@@ -3,6 +3,7 @@ package mbcs
 import (
 	"github.com/drhelius/demo-emulator/gb/cpu"
 	"github.com/drhelius/demo-emulator/gb/input"
+	"github.com/drhelius/demo-emulator/gb/mapper"
 	"github.com/drhelius/demo-emulator/gb/util"
 	"github.com/drhelius/demo-emulator/gb/video"
 )
@@ -36,7 +37,7 @@ func ReadIO(addr uint16, mem []uint8) uint8 {
 }
 
 // WriteIO stores the 8 bit value at the 16 bit address of the memory
-func WriteIO(addr uint16, value uint8, mem []uint8) {
+func WriteIO(addr uint16, value uint8, mem []uint8, m mapper.Mapper) {
 	switch addr {
 	case 0xFF00:
 		// P1
@@ -98,7 +99,7 @@ func WriteIO(addr uint16, value uint8, mem []uint8) {
 		address := uint16(value) << 8
 		if address >= 0x8000 && address < 0xE000 {
 			for i := uint16(0x0000); i < 0x00A0; i++ {
-				mem[0xFE00+i] = mem[address+i]
+				m.Write(0xFE00+i, m.Read(address+i))
 			}
 		}
 	case 0xFFFF:

@@ -24,21 +24,23 @@ const (
 )
 
 var (
-	af          SixteenBitReg
-	bc          SixteenBitReg
-	de          SixteenBitReg
-	hl          SixteenBitReg
-	sp          SixteenBitReg
-	pc          SixteenBitReg
-	mem         mapper.Mapper
-	ime         bool
-	halt        bool
-	branchTaken bool
-	clockCycles uint32
-	divCycles   uint32
-	timaCycles  uint32
-	imeCycles   int
-	skipPCBug   bool
+	af           SixteenBitReg
+	bc           SixteenBitReg
+	de           SixteenBitReg
+	hl           SixteenBitReg
+	sp           SixteenBitReg
+	pc           SixteenBitReg
+	mem          mapper.Mapper
+	ime          bool
+	halt         bool
+	branchTaken  bool
+	clockCycles  uint32
+	divCycles    uint32
+	timaCycles   uint32
+	imeCycles    int
+	serialBit    int
+	serialCycles uint32
+	skipPCBug    bool
 )
 
 func init() {
@@ -75,6 +77,7 @@ func Tick() uint32 {
 	}
 
 	updateTimers()
+	updateSerial()
 
 	if imeCycles > 0 {
 		imeCycles -= int(clockCycles)
@@ -234,6 +237,37 @@ func updateTimers() {
 			}
 
 			mem.Write(0xFF05, tima)
+		}
+	}
+}
+
+func updateSerial() {
+	sc := mem.Read(0xFF02)
+
+	if util.IsSetBit(sc, 7) && util.IsSetBit(sc, 0) {
+		serialCycles += clockCycles
+
+		if serialBit < 0 {
+			serialBit = 0
+			serialCycles = 0
+			return
+		}
+
+		if serialCycles >= 512 {
+			if serialBit > 7 {
+				mem.Write(0xFF02, sc&0x7F)
+				RequestInterrupt(InterruptSerial)
+				serialBit = -1
+				return
+			}
+
+			sb := mem.Read(0xFF01)
+			sb <<= 1
+			sb |= 0x01
+			mem.Write(0xFF01, sb)
+
+			serialCycles -= 512
+			serialBit++
 		}
 	}
 }

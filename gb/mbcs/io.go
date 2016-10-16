@@ -60,7 +60,12 @@ func WriteIO(addr uint16, value uint8, mem []uint8, m mapper.Mapper) {
 		mem[addr] = value & 0x1F
 	case 0xFF40:
 		// LCDC
-		mem[addr] = value
+		currentLcdc := mem[addr]
+		newLcdc := value
+		mem[addr] = newLcdc
+		if !util.IsSetBit(currentLcdc, 5) && util.IsSetBit(newLcdc, 5) {
+			video.ResetWindowLine()
+		}
 		if util.IsSetBit(value, 7) {
 			video.EnableScreen()
 		} else {

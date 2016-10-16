@@ -16,6 +16,7 @@ var (
 	subStatusModeCycles uint32
 	lyCounter           uint8
 	vblankLine          uint8
+	windowLine          uint32
 	mem                 mapper.Mapper
 	spriteCacheBuffer   [util.GbWidth * util.GbHeight]int
 	colorCacheBuffer    [util.GbWidth * util.GbHeight]uint8
@@ -60,6 +61,7 @@ func Tick(cycles uint32) bool {
 						cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
 					}
 					vblank = true
+					windowLine = 0
 				} else {
 					stat := mem.GetMemoryMap()[0xFF41]
 					if util.IsSetBit(stat, 5) {
@@ -133,6 +135,7 @@ func EnableScreen() {
 		subStatusModeCycles = 0
 		lyCounter = 0
 		vblankLine = 0
+		windowLine = 0
 
 		mem.GetMemoryMap()[0xFF44] = lyCounter
 
@@ -174,6 +177,15 @@ func CompareLYToLYC() {
 		}
 
 		mem.GetMemoryMap()[0xFF41] = stat
+	}
+}
+
+// ResetWindowLine resetes the current line of the window
+func ResetWindowLine() {
+	wy := mem.GetMemoryMap()[0xFF4A]
+
+	if (windowLine == 0) && (lyCounter < 144) && (lyCounter > wy) {
+		windowLine = 144
 	}
 }
 
@@ -224,7 +236,7 @@ func renderBG(line uint8) {
 			var tile uint8
 
 			if tiles == 0x8800 {
-				tile = uint8(int32(int8(mem.Read(uint16(maploc+y32+x)))) + 128)
+				tile = uint8(int32(int8(mem.GetMemoryMap()[maploc+y32+x])) + 128)
 			} else {
 				tile = mem.Read(uint16(maploc + y32 + x))
 			}
@@ -271,6 +283,84 @@ func renderBG(line uint8) {
 }
 
 func renderWindow(line uint8) {
+	if windowLine > 143 {
+		return
+	}
+
+	lcdc := mem.GetMemoryMap()[0xFF40]
+	if !util.IsSetBit(lcdc, 5) {
+		return
+	}
+
+	wx := int(mem.GetMemoryMap()[0xFF4B]) - 7
+	if wx > 159 {
+		return
+	}
+
+	wy := mem.GetMemoryMap()[0xFF4A]
+	if (wy > 143) || (wy > line) {
+		return
+	}
+
+	var tilesAddr uint32 = 0x8800
+	if util.IsSetBit(lcdc, 4) {
+		tilesAddr = 0x8000
+	}
+	var mapAddr uint32 = 0x9800
+	if util.IsSetBit(lcdc, 6) {
+		mapAddr = 0x9C00
+	}
+
+	lineAdjusted := windowLine
+	y_32 := (lineAdjusted / 8) * 32
+	pixely := lineAdjusted % 8
+	pixely_2 := pixely * 2
+	line_width := uint32(line) * util.GbWidth
+
+	var x uint32
+	for ; x < 32; x++ {
+		var tile int
+
+		if tilesAddr == 0x8800 {
+			tile = int(int8(mem.GetMemoryMap()[mapAddr+y_32+x]))
+			tile += 128
+		} else {
+			tile = int(mem.GetMemoryMap()[mapAddr+y_32+x])
+		}
+
+		mapOffsetX := x * 8
+		tile_16 := uint32(tile) * 16
+		tile_address := tilesAddr + tile_16 + pixely_2
+
+		byte1 := mem.GetMemoryMap()[tile_address]
+		byte2 := mem.GetMemoryMap()[tile_address+1]
+
+		var pixelx uint8
+		for ; pixelx < 8; pixelx++ {
+			bufferX := (int(mapOffsetX) + int(pixelx) + wx)
+
+			if (bufferX < 0) || (bufferX >= util.GbWidth) {
+				continue
+			}
+
+			var pixel uint8
+			if (byte1 & (0x1 << (7 - pixelx))) != 0 {
+				pixel = 1
+			}
+			if (byte2 & (0x1 << (7 - pixelx))) != 0 {
+				pixel |= 2
+			}
+
+			position := line_width + uint32(bufferX)
+			colorCacheBuffer[position] = pixel & 0x03
+
+			palette := mem.GetMemoryMap()[0xFF47]
+			color := (palette >> (pixel * 2)) & 0x03
+			GbFrameBuffer[position] = color
+
+		}
+	}
+	windowLine++
 }
 
 func renderSprites(line uint8) {

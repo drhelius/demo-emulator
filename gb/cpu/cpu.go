@@ -1,9 +1,6 @@
 package cpu
 
-import (
-	"github.com/drhelius/demo-emulator/gb/mapper"
-	"github.com/drhelius/demo-emulator/gb/util"
-)
+import "github.com/drhelius/demo-emulator/gb/mapper"
 
 // Interrupt types
 const (
@@ -24,23 +21,19 @@ const (
 )
 
 var (
-	af           SixteenBitReg
-	bc           SixteenBitReg
-	de           SixteenBitReg
-	hl           SixteenBitReg
-	sp           SixteenBitReg
-	pc           SixteenBitReg
-	mem          mapper.Mapper
-	ime          bool
-	halt         bool
-	branchTaken  bool
-	clockCycles  uint
-	divCycles    uint
-	timaCycles   uint
-	imeCycles    int
-	serialBit    int
-	serialCycles uint
-	skipPCBug    bool
+	af          SixteenBitReg
+	bc          SixteenBitReg
+	de          SixteenBitReg
+	hl          SixteenBitReg
+	sp          SixteenBitReg
+	pc          SixteenBitReg
+	mem         mapper.Mapper
+	ime         bool
+	halt        bool
+	branchTaken bool
+	clockCycles uint
+	imeCycles   int
+	skipPCBug   bool
 )
 
 func init() {
@@ -92,16 +85,6 @@ func Tick() uint {
 // RequestInterrupt is used to raise a new interrupt
 func RequestInterrupt(interrupt uint8) {
 	mem.Write(0xFF0F, mem.Read(0xFF0F)|interrupt)
-}
-
-// ResetDivCycles sets divCycles to 0
-func ResetDivCycles() {
-	divCycles = 0
-}
-
-// ResetTimaCycles sets timaCycles to 0
-func ResetTimaCycles() {
-	timaCycles = 0
 }
 
 func fetchOpcode() uint8 {
@@ -191,82 +174,6 @@ func serveInterrupt(interrupt uint8) {
 			stackPush(&pc)
 			pc.SetValue(0x0060)
 			clockCycles += 20
-		}
-	}
-}
-
-func updateTimers() {
-	divCycles += clockCycles
-
-	for divCycles >= 256 {
-		divCycles -= 256
-		div := mem.Read(0xFF04)
-		div++
-		mem.Write(0xFF04, div)
-	}
-
-	tac := mem.Read(0xFF07)
-
-	// if tima is running
-	if util.IsSetBit(tac, 2) {
-		timaCycles += clockCycles
-
-		var freq uint
-
-		switch tac & 0x03 {
-		case 0:
-			freq = 1024
-		case 1:
-			freq = 16
-		case 2:
-			freq = 64
-		case 3:
-			freq = 256
-		}
-
-		for timaCycles >= freq {
-			timaCycles -= freq
-			tima := mem.Read(0xFF05)
-
-			if tima == 0xFF {
-				tima = mem.Read(0xFF06)
-				RequestInterrupt(InterruptTimer)
-			} else {
-				tima++
-			}
-
-			mem.Write(0xFF05, tima)
-		}
-	}
-}
-
-func updateSerial() {
-	sc := mem.Read(0xFF02)
-
-	if util.IsSetBit(sc, 7) && util.IsSetBit(sc, 0) {
-		serialCycles += clockCycles
-
-		if serialBit < 0 {
-			serialBit = 0
-			serialCycles = 0
-			return
-		}
-
-		if serialCycles >= 512 {
-			if serialBit > 7 {
-				mem.Write(0xFF02, sc&0x7F)
-				RequestInterrupt(InterruptSerial)
-				serialBit = -1
-				return
-			}
-
-			sb := mem.Read(0xFF01)
-			sb <<= 1
-			sb |= 0x01
-			mem.Write(0xFF01, sb)
-
-			serialCycles -= 512
-			serialBit++
 		}
 	}
 }

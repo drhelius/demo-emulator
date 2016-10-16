@@ -10,20 +10,28 @@ This is a Nintendo Game Boy emulator written in Go for demonstration purposes on
 Follow me on Twitter for updates: http://twitter.com/drhelius
 
 ----------
+
+Building
+--------
 ```
 go get github.com/drhelius/demo-emulator
+```
+
+Running
+-------
+```
 $GOPATH/bin/demo-emulator -rom your_rom.gb
 ```
-----------
 
 Controls
 --------
-
+```
 START = Enter
 SELECT = Space
 A = S
 B = A
 Pad = Cursors
+```
 
 License
 -------

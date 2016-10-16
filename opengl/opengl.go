@@ -2,7 +2,6 @@ package opengl
 
 import (
 	"fmt"
-	"runtime"
 
 	"github.com/drhelius/demo-emulator/gb/util"
 	"github.com/go-gl/gl/v2.1/gl"
@@ -14,11 +13,6 @@ var (
 	viewportHeight   = util.GbHeight
 	colorFrameBuffer []uint8
 )
-
-func init() {
-	// GLFW event handling must run on the main OS thread
-	runtime.LockOSThread()
-}
 
 // Setup initializes OpenGL
 func Setup(fb []uint8) {

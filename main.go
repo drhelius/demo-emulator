@@ -18,6 +18,7 @@ func main() {
 	loadROM()
 	loop()
 	opengl.Teardown()
+	glfw.Teardown()
 }
 
 func loadROM() {

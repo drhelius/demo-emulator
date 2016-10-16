@@ -3,6 +3,7 @@ package glfw
 import (
 	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/drhelius/demo-emulator/gb/core"
 	"github.com/drhelius/demo-emulator/gb/util"
@@ -13,12 +14,16 @@ const zoom = 5
 
 var window *glfw.Window
 
+func init() {
+	// GLFW event handling must run on the main OS thread
+	runtime.LockOSThread()
+}
+
 // Setup initializes the windowing system
 func Setup() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to initialize glfw:", err)
 	}
-	defer glfw.Terminate()
 
 	fmt.Println("glfw init ok")
 
@@ -48,6 +53,11 @@ func Update() {
 // WindowClosed checks if the window has been closed
 func WindowClosed() bool {
 	return window.ShouldClose()
+}
+
+// Teardown shut downs the windowing system
+func Teardown() {
+	glfw.Terminate()
 }
 
 func onKey(window *glfw.Window, k glfw.Key, s int, action glfw.Action, mods glfw.ModifierKey) {

@@ -8,7 +8,7 @@ import (
 var (
 	joypadState uint8
 	p1          uint8
-	inputCycles uint32
+	inputCycles uint
 )
 
 func init() {
@@ -17,7 +17,7 @@ func init() {
 }
 
 // Tick runs the input eumulation n cycles
-func Tick(cycles uint32) {
+func Tick(cycles uint) {
 	inputCycles += cycles
 
 	// Joypad Poll Speed (64 Hz)

@@ -17,8 +17,8 @@ const zoom = 5
 
 var (
 	texture          uint32
-	viewportWidth    int32 = util.GbWidth
-	viewportHeight   int32 = util.GbHeight
+	viewportWidth    = util.GbWidth
+	viewportHeight   = util.GbHeight
 	colorFrameBuffer [util.GbWidth * util.GbHeight * 4]uint8
 	window           *glfw.Window
 )

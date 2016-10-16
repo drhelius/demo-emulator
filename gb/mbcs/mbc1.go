@@ -8,11 +8,11 @@ type MBC1 struct {
 	rom             []uint8
 	ram             []uint8
 	mode            uint8
-	romBank         uint32
+	romBank         uint
 	ramBank         uint16
 	ramEnabled      bool
-	romBankHighBits uint32
-	higherROMBank   uint32
+	romBankHighBits uint
+	higherROMBank   uint
 	higherRAMBank   uint16
 	ramSize         uint8
 }
@@ -52,7 +52,7 @@ func (m *MBC1) Setup(r []uint8) {
 		break
 	}
 	fmt.Printf("the higher RAM bank is %X\n", m.higherRAMBank)
-	m.higherROMBank = uint32(max(pow2Ceil(len(m.rom)/0x4000), 2) - 1)
+	m.higherROMBank = uint(max(pow2Ceil(len(m.rom)/0x4000), 2) - 1)
 	fmt.Printf("the higher ROM bank is %X\n", m.higherROMBank)
 }
 
@@ -64,7 +64,7 @@ func (m *MBC1) Read(addr uint16) uint8 {
 		return m.rom[addr]
 	case (addr >= 0x4000) && (addr < 0x8000):
 		// ROM bank X
-		return m.rom[(uint32(addr)-0x4000)+(m.romBank*0x4000)]
+		return m.rom[(uint(addr)-0x4000)+(m.romBank*0x4000)]
 	case (addr >= 0xA000) && (addr < 0xC000):
 		// RAM bank
 		if m.ramEnabled {
@@ -91,9 +91,9 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 		}
 	case (addr >= 0x2000) && (addr < 0x4000):
 		if m.mode == 0 {
-			m.romBank = uint32(value&0x1F) | (m.romBankHighBits << 5)
+			m.romBank = uint(value&0x1F) | (m.romBankHighBits << 5)
 		} else {
-			m.romBank = uint32(value & 0x1F)
+			m.romBank = uint(value & 0x1F)
 		}
 
 		if m.romBank == 0x00 || m.romBank == 0x20 || m.romBank == 0x40 || m.romBank == 0x60 {
@@ -106,7 +106,7 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 			m.ramBank = uint16(value & 0x03)
 			m.ramBank &= m.higherRAMBank
 		} else {
-			m.romBankHighBits = uint32(value & 0x03)
+			m.romBankHighBits = uint(value & 0x03)
 			m.romBank = (m.romBank & 0x1F) | (m.romBankHighBits << 5)
 
 			if m.romBank == 0x00 || m.romBank == 0x20 || m.romBank == 0x40 || m.romBank == 0x60 {

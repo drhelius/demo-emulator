@@ -34,12 +34,12 @@ var (
 	ime          bool
 	halt         bool
 	branchTaken  bool
-	clockCycles  uint32
-	divCycles    uint32
-	timaCycles   uint32
+	clockCycles  uint
+	divCycles    uint
+	timaCycles   uint
 	imeCycles    int
 	serialBit    int
-	serialCycles uint32
+	serialCycles uint
 	skipPCBug    bool
 )
 
@@ -59,7 +59,7 @@ func SetMapper(m mapper.Mapper) {
 
 // Tick runs a single instruction of the processor
 // Then returns the number of cycles used
-func Tick() uint32 {
+func Tick() uint {
 	clockCycles = 0
 
 	if halt {
@@ -212,7 +212,7 @@ func updateTimers() {
 	if util.IsSetBit(tac, 2) {
 		timaCycles += clockCycles
 
-		var freq uint32
+		var freq uint
 
 		switch tac & 0x03 {
 		case 0:

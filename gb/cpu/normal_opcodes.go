@@ -137,7 +137,7 @@ func opcode0x17() {
 func opcode0x18() {
 	// JR n
 	offset := int8(mem.Read(pc.GetValue()))
-	value := int32(pc.GetValue()) + 1 + int32(offset)
+	value := int(pc.GetValue()) + 1 + int(offset)
 	pc.SetValue(uint16(value))
 }
 
@@ -181,7 +181,7 @@ func opcode0x20() {
 	// JR NZ,n
 	if !isSetFlag(flagZero) {
 		offset := int8(mem.Read(pc.GetValue()))
-		value := int32(pc.GetValue()) + 1 + int32(offset)
+		value := int(pc.GetValue()) + 1 + int(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
@@ -262,7 +262,7 @@ func opcode0x28() {
 	// JR Z,n
 	if isSetFlag(flagZero) {
 		offset := int8(mem.Read(pc.GetValue()))
-		value := int32(pc.GetValue()) + 1 + int32(offset)
+		value := int(pc.GetValue()) + 1 + int(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
@@ -313,7 +313,7 @@ func opcode0x30() {
 	// JR NC,n
 	if !isSetFlag(flagCarry) {
 		offset := int8(mem.Read(pc.GetValue()))
-		value := int32(pc.GetValue()) + 1 + int32(offset)
+		value := int(pc.GetValue()) + 1 + int(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
@@ -367,7 +367,7 @@ func opcode0x38() {
 	// JR C,n
 	if isSetFlag(flagCarry) {
 		offset := int8(mem.Read(pc.GetValue()))
-		value := int32(pc.GetValue()) + 1 + int32(offset)
+		value := int(pc.GetValue()) + 1 + int(offset)
 		pc.SetValue(uint16(value))
 		branchTaken = true
 	} else {
@@ -1477,7 +1477,7 @@ func opcode0xF7() {
 func opcode0xF8() {
 	// LD HL,SP+n
 	offset := int8(mem.Read(pc.GetValue()))
-	value := int32(sp.GetValue()) + int32(offset)
+	value := int(sp.GetValue()) + int(offset)
 	result := uint16(value)
 	clearAllFlags()
 	if ((sp.GetValue() ^ uint16(offset) ^ result) & 0x100) == 0x100 {

@@ -12,11 +12,11 @@ var (
 	// ScreenEnabled keeps track of the screen state
 	ScreenEnabled       bool
 	statusMode          uint8
-	statusModeCycles    uint32
-	subStatusModeCycles uint32
+	statusModeCycles    uint
+	subStatusModeCycles uint
 	lyCounter           uint8
 	vblankLine          uint8
-	windowLine          uint32
+	windowLine          uint
 	mem                 mapper.Mapper
 	spriteCacheBuffer   [util.GbWidth * util.GbHeight]int
 	colorCacheBuffer    [util.GbWidth * util.GbHeight]uint8
@@ -35,7 +35,7 @@ func SetMapper(m mapper.Mapper) {
 
 // Tick runs the video eumulation n cycles
 // Then updates the frameBuffer and returns true if the simulation reached the vblank
-func Tick(cycles uint32) bool {
+func Tick(cycles uint) bool {
 	vblank := false
 
 	if ScreenEnabled {
@@ -212,14 +212,14 @@ func scanLine(line uint8) {
 
 func renderBG(line uint8) {
 	lcdc := mem.GetMemoryMap()[0xFF40]
-	lineWidth := uint32(line) * uint32(util.GbWidth)
+	lineWidth := uint(line) * uint(util.GbWidth)
 
 	if util.IsSetBit(lcdc, 0) {
-		var tiles uint32 = 0x8800
+		var tiles uint = 0x8800
 		if util.IsSetBit(lcdc, 4) {
 			tiles = 0x8000
 		}
-		var maploc uint32 = 0x9800
+		var maploc uint = 0x9800
 		if util.IsSetBit(lcdc, 3) {
 			maploc = 0x9C00
 		}
@@ -227,22 +227,22 @@ func renderBG(line uint8) {
 		scx := mem.GetMemoryMap()[0xFF43]
 		scy := mem.GetMemoryMap()[0xFF42]
 		lineAdjusted := line + scy
-		y32 := (uint32(lineAdjusted) / 8) * 32
-		pixely := uint32(lineAdjusted) % 8
+		y32 := (uint(lineAdjusted) / 8) * 32
+		pixely := uint(lineAdjusted) % 8
 		pixely2 := pixely * 2
 
-		var x uint32
+		var x uint
 		for ; x < 32; x++ {
 			var tile uint8
 
 			if tiles == 0x8800 {
-				tile = uint8(int32(int8(mem.GetMemoryMap()[maploc+y32+x])) + 128)
+				tile = uint8(int(int8(mem.GetMemoryMap()[maploc+y32+x])) + 128)
 			} else {
 				tile = mem.Read(uint16(maploc + y32 + x))
 			}
 
 			mapOffsetX := x * 8
-			tile16 := uint32(tile) * 16
+			tile16 := uint(tile) * 16
 			tileAddress := tiles + tile16 + pixely2
 
 			byte1 := mem.Read(uint16(tileAddress))
@@ -263,7 +263,7 @@ func renderBG(line uint8) {
 					pixel |= 2
 				}
 
-				position := lineWidth + uint32(bufferX)
+				position := lineWidth + uint(bufferX)
 
 				colorCacheBuffer[position] = pixel & 0x03
 
@@ -273,7 +273,7 @@ func renderBG(line uint8) {
 			}
 		}
 	} else {
-		var x uint32
+		var x uint
 		for ; x < util.GbWidth; x++ {
 			position := lineWidth + x
 			GbFrameBuffer[position] = 0
@@ -302,38 +302,38 @@ func renderWindow(line uint8) {
 		return
 	}
 
-	var tilesAddr uint32 = 0x8800
+	var tilesAddr uint = 0x8800
 	if util.IsSetBit(lcdc, 4) {
 		tilesAddr = 0x8000
 	}
-	var mapAddr uint32 = 0x9800
+	var mapAddr uint = 0x9800
 	if util.IsSetBit(lcdc, 6) {
 		mapAddr = 0x9C00
 	}
 
 	lineAdjusted := windowLine
-	y_32 := (lineAdjusted / 8) * 32
+	y32 := (lineAdjusted / 8) * 32
 	pixely := lineAdjusted % 8
-	pixely_2 := pixely * 2
-	line_width := uint32(line) * util.GbWidth
+	pixely2 := pixely * 2
+	lineWidth := uint(line) * util.GbWidth
 
-	var x uint32
+	var x uint
 	for ; x < 32; x++ {
 		var tile int
 
 		if tilesAddr == 0x8800 {
-			tile = int(int8(mem.GetMemoryMap()[mapAddr+y_32+x]))
+			tile = int(int8(mem.GetMemoryMap()[mapAddr+y32+x]))
 			tile += 128
 		} else {
-			tile = int(mem.GetMemoryMap()[mapAddr+y_32+x])
+			tile = int(mem.GetMemoryMap()[mapAddr+y32+x])
 		}
 
 		mapOffsetX := x * 8
-		tile_16 := uint32(tile) * 16
-		tile_address := tilesAddr + tile_16 + pixely_2
+		tile16 := uint(tile) * 16
+		tileAddress := tilesAddr + tile16 + pixely2
 
-		byte1 := mem.GetMemoryMap()[tile_address]
-		byte2 := mem.GetMemoryMap()[tile_address+1]
+		byte1 := mem.GetMemoryMap()[tileAddress]
+		byte2 := mem.GetMemoryMap()[tileAddress+1]
 
 		var pixelx uint8
 		for ; pixelx < 8; pixelx++ {
@@ -351,7 +351,7 @@ func renderWindow(line uint8) {
 				pixel |= 2
 			}
 
-			position := line_width + uint32(bufferX)
+			position := lineWidth + uint(bufferX)
 			colorCacheBuffer[position] = pixel & 0x03
 
 			palette := mem.GetMemoryMap()[0xFF47]

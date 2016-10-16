@@ -39,7 +39,6 @@ func (m *MBC1) Setup(r []uint8) {
 
 	m.romBank = 1
 	m.ramSize = m.rom[0x149]
-	fmt.Printf("the size of ther RAM is %X\n", m.ramSize)
 	switch m.ramSize {
 	case 0x00:
 		fallthrough
@@ -51,9 +50,11 @@ func (m *MBC1) Setup(r []uint8) {
 		m.higherRAMBank = 0x03
 		break
 	}
-	fmt.Printf("the higher RAM bank is %X\n", m.higherRAMBank)
+
 	m.higherROMBank = uint(max(pow2Ceil(len(m.rom)/0x4000), 2) - 1)
-	fmt.Printf("the higher ROM bank is %X\n", m.higherROMBank)
+
+	fmt.Printf("%d ROM banks\n", m.higherROMBank+1)
+	fmt.Printf("%d RAM banks\n", m.higherRAMBank+1)
 }
 
 // Read returns the 8 bit value at the 16 bit address of the memory
@@ -73,7 +74,7 @@ func (m *MBC1) Read(addr uint16) uint8 {
 			}
 			return m.ram[(addr-0xA000)+(m.ramBank*0x2000)]
 		}
-		fmt.Printf("** Attempting to read from disabled RAM %X\n", addr)
+		fmt.Printf("*** attempting to read from disabled RAM %X\n", addr)
 		return 0xFF
 	case addr >= 0xFF00:
 		// IO Registers
@@ -95,11 +96,9 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 		} else {
 			m.romBank = uint(value & 0x1F)
 		}
-
 		if m.romBank == 0x00 || m.romBank == 0x20 || m.romBank == 0x40 || m.romBank == 0x60 {
 			m.romBank++
 		}
-
 		m.romBank &= m.higherROMBank
 	case (addr >= 0x4000) && (addr < 0x6000):
 		if m.mode == 1 {
@@ -108,16 +107,14 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 		} else {
 			m.romBankHighBits = uint(value & 0x03)
 			m.romBank = (m.romBank & 0x1F) | (m.romBankHighBits << 5)
-
 			if m.romBank == 0x00 || m.romBank == 0x20 || m.romBank == 0x40 || m.romBank == 0x60 {
 				m.romBank++
 			}
-
 			m.romBank &= m.higherROMBank
 		}
 	case (addr >= 0x6000) && (addr < 0x8000):
 		if (m.ramSize != 3) && ((value & 0x01) != 0) {
-			fmt.Printf("** Attempting to change MBC1 to mode 1 with incorrect RAM banks %X %X\n", addr, value)
+			fmt.Printf("*** attempting to change MBC1 to mode 1 with incorrect RAM banks %X %X\n", addr, value)
 		} else {
 			m.mode = value & 0x01
 		}
@@ -129,7 +126,7 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 				m.ram[(addr-0xA000)+(m.ramBank*0x2000)] = value
 			}
 		} else {
-			fmt.Printf("** Attempting to write to disabled RAM %X\n", addr)
+			fmt.Printf("*** attempting to write to disabled RAM %X %X\n", addr, value)
 		}
 	case (addr >= 0xC000) && (addr < 0xFE00):
 		WriteCommon(addr, value, m.memoryMap)

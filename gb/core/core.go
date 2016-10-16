@@ -54,25 +54,25 @@ func LoadROM(filePath string) {
 
 	switch cartType {
 	case 0x00:
-		fmt.Println("ROM")
+		fmt.Println("found ROM")
 		m = new(mbcs.RomOnly)
 	case 0x08:
-		fmt.Println("ROM + SRAM")
+		fmt.Println("found ROM + SRAM")
 		m = new(mbcs.RomOnly)
 	case 0x09:
-		fmt.Println("ROM + SRAM + BATT")
+		fmt.Println("found ROM + SRAM + BATT")
 		m = new(mbcs.RomOnly)
 	case 0x01:
-		fmt.Println("MBC1")
+		fmt.Println("found MBC1")
 		m = new(mbcs.MBC1)
 	case 0x02:
-		fmt.Println("MBC1 + SRAM")
+		fmt.Println("found MBC1 + SRAM")
 		m = new(mbcs.MBC1)
 	case 0x03:
-		fmt.Println("MBC1 + SRAM + BATT")
+		fmt.Println("found MBC1 + SRAM + BATT")
 		m = new(mbcs.MBC1)
 	default:
-		panic(fmt.Sprintf("Cartridge type not supported: %d", cartType))
+		panic(fmt.Sprintf("cartridge type not supported: %d", cartType))
 	}
 
 	m.Setup(data)

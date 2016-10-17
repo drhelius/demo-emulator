@@ -23,7 +23,7 @@ Once you have a working Go environment you'll need to install the following depe
 
 ### Linux
 
-- Ubuntu: <code>sudo apt-get install build-essential libgl1-mesa-dev xorg-dev</code>.
+- Ubuntu: <code>sudo apt-get install build-essential libgl1-mesa-dev xorg-dev</code>
 
 ### Mac OS X
 

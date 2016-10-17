@@ -6,7 +6,7 @@ Nintendo Game Boy emulator written in Go.
 
 Follow me on Twitter for updates: http://twitter.com/drhelius
 
-![Screenshot](/screenshots/screenshot1.png?raw=true "Screenshot") ![Screenshot](/screenshots/screenshot2.png?raw=true "Screenshot")
+![Screenshot](/screenshots/screenshot1.png "Screenshot") ![Screenshot](/screenshots/screenshot2.png "Screenshot")
 
 
 Requirements

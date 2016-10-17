@@ -26,20 +26,21 @@ Once you have a working Go environment you'll need to install the following depe
 
 - You need Xcode or Command Line Tools for Xcode (<code>xcode-select --install</code>) for required headers and libraries.
 
-
 Building
 --------
+Run this command to let Go download an build the sources. You don't even need to clone this repo, Go will do it for you:
+
 ```
 go get github.com/drhelius/demo-emulator
 ```
 
-
 Running
 -------
-```
-$GOPATH/bin/demo-emulator -rom your_rom.gb
-```
+Once built you can find the emulator binary in <code>$GOPATH/bin</code>. Use it with the <code>-rom</code> argument in order to load a Game Boy ROM file:
 
+```
+$GOPATH/bin/demo-emulator -rom path/to/your_rom.gb
+```
 
 Controls
 --------

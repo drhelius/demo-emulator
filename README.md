@@ -6,6 +6,7 @@ Nintendo Game Boy emulator written in Go.
 
 Follow me on Twitter for updates: http://twitter.com/drhelius
 
+
 Requirements
 ------------
 
@@ -25,17 +26,20 @@ Once you have a working Go environment you'll need to install the following depe
 
 - You need Xcode or Command Line Tools for Xcode (<code>xcode-select --install</code>) for required headers and libraries.
 
+
 Building
 --------
 ```
 go get github.com/drhelius/demo-emulator
 ```
 
+
 Running
 -------
 ```
 $GOPATH/bin/demo-emulator -rom your_rom.gb
 ```
+
 
 Controls
 --------
@@ -46,6 +50,7 @@ A = S
 B = A
 Pad = Cursors
 ```
+
 
 License
 -------

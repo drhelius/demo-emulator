@@ -21,6 +21,7 @@ var (
 )
 
 func init() {
+	// the Game Boy starts on V-BLANK
 	statusMode = 1
 	lyCounter = 144
 	ScreenEnabled = true
@@ -39,8 +40,8 @@ func Tick(cycles uint) bool {
 
 	if ScreenEnabled {
 		switch statusMode {
+		// During H-BLANK
 		case 0:
-			// During H-BLANK
 			if statusModeCycles >= 204 {
 				statusModeCycles -= 204
 				statusMode = 2
@@ -48,6 +49,7 @@ func Tick(cycles uint) bool {
 				mem.GetMemoryMap()[0xFF44] = lyCounter
 				CompareLYToLYC()
 
+				// if last visible line, change to vblank
 				if lyCounter == 144 {
 					statusMode = 1
 					vblankLine = 0
@@ -68,10 +70,11 @@ func Tick(cycles uint) bool {
 
 				updateStatRegister()
 			}
+		// During V-BLANK
 		case 1:
-			// During V-BLANK
 			subStatusModeCycles += cycles
 
+			// advance a line each 456 cycles
 			if subStatusModeCycles >= 456 {
 				subStatusModeCycles -= 456
 				vblankLine++
@@ -83,12 +86,14 @@ func Tick(cycles uint) bool {
 				}
 			}
 
+			// line 0 starts one line before the end of V-BLANK
 			if (statusModeCycles >= 4104) && (subStatusModeCycles >= 4) && (lyCounter == 153) {
 				lyCounter = 0
 				mem.GetMemoryMap()[0xFF44] = lyCounter
 				CompareLYToLYC()
 			}
 
+			// end of V-BLANK
 			if statusModeCycles >= 4560 {
 				statusModeCycles -= 4560
 				statusMode = 2
@@ -98,15 +103,15 @@ func Tick(cycles uint) bool {
 					cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
 				}
 			}
+		// During searching OAM RAM
 		case 2:
-			// During searching OAM RAM
 			if statusModeCycles >= 80 {
 				statusModeCycles -= 80
 				statusMode = 3
 				updateStatRegister()
 			}
+		// During transfering data to LCD driver
 		case 3:
-			// During transfering data to LCD driver
 			if statusModeCycles >= 172 {
 				statusModeCycles -= 172
 				statusMode = 0
@@ -118,7 +123,10 @@ func Tick(cycles uint) bool {
 				}
 			}
 		}
+		// if ScreenEnabled == false
 	} else {
+		// force a vblank each frame even if
+		// the screen is disabled
 		if statusModeCycles >= 70224 {
 			statusModeCycles -= 70224
 			vblank = true

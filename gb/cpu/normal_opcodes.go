@@ -696,7 +696,7 @@ func opcode0x76() {
 		ifreg := mem.Read(0xFF0F)
 		iereg := mem.Read(0xFFFF)
 
-		halt = true
+		halted = true
 
 		if !ime && ((ifreg & iereg & 0x1F) != 0) {
 			skipPCBug = true

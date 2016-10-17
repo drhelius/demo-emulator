@@ -29,7 +29,7 @@ var (
 	pc          SixteenBitReg
 	mem         mapper.Mapper
 	ime         bool
-	halt        bool
+	halted      bool
 	branchTaken bool
 	clockCycles uint
 	imeCycles   int
@@ -55,15 +55,15 @@ func SetMapper(m mapper.Mapper) {
 func Tick() uint {
 	clockCycles = 0
 
-	if halt {
+	if halted {
 		if interruptPending() != InterruptNone {
-			halt = false
+			halted = false
 		} else {
 			clockCycles += 4
 		}
 	}
 
-	if !halt {
+	if !halted {
 		serveInterrupt(interruptPending())
 		runOpcode(fetchOpcode())
 	}

@@ -10,6 +10,22 @@ This is a Nintendo Game Boy emulator written in Go for demonstration purposes on
 Follow me on Twitter for updates: http://twitter.com/drhelius
 
 ----------
+Requirements
+------------
+
+You need a Go working environment. In addition you'll need the following dependecies:
+
+### Windows
+
+- GCC 64 bit installed: http://tdm-gcc.tdragon.net/download
+
+### Linux
+
+- Ubuntu: <code>sudo apt-get install build-essential libgl1-mesa-dev xorg-dev</code>.
+
+### Mac OS X
+
+- You need Xcode or Command Line Tools for Xcode (<code>xcode-select --install</code>) for required headers and libraries.
 
 Building
 --------

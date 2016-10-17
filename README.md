@@ -28,7 +28,7 @@ Once you have a working Go environment you'll need to install the following depe
 
 Building
 --------
-Run this command to let Go download an build the sources. You don't even need to clone this repo, Go will do it for you:
+Run this command to let Go download and build the sources. You don't even need to clone this repo, Go will do it for you:
 
 ```
 go get github.com/drhelius/demo-emulator

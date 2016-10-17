@@ -10,7 +10,7 @@ Follow me on Twitter for updates: http://twitter.com/drhelius
 Requirements
 ------------
 
-Before you start make sure you have Go installed and ready to build applciations: https://golang.org/doc/install
+Before you start, make sure you have Go installed and ready to build applications: https://golang.org/doc/install
 
 Once you have a working Go environment you'll need to install the following dependecies:
 

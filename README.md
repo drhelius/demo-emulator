@@ -1,10 +1,10 @@
-demo-emulator
+demo-emulator [![Build Status](https://travis-ci.org/drhelius/demo-emulator.svg?branch=master)](https://travis-ci.org/drhelius/demo-emulator)
 =======
 <b>Copyright &copy; 2016 by Ignacio Sanchez</b>
-Nintendo Game Boy emulator written in Go.
-Follow me on Twitter for updates: http://twitter.com/drhelius
 
-[![Build Status](https://travis-ci.org/drhelius/demo-emulator.svg?branch=master)](https://travis-ci.org/drhelius/demo-emulator)
+Nintendo Game Boy emulator written in Go.
+
+Follow me on Twitter for updates: http://twitter.com/drhelius
 
 Requirements
 ------------

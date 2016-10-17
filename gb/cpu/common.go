@@ -3,16 +3,16 @@ package cpu
 import "fmt"
 
 func clearAllFlags() {
-	setFlag(flagNone)
+	initFlagReg(flagNone)
 }
 
-func toggleZeroFlagFromResult(result uint8) {
+func setZeroFlagFromResult(result uint8) {
 	if result == 0 {
-		toggleFlag(flagZero)
+		setFlag(flagZero)
 	}
 }
 
-func setFlag(flag uint8) {
+func initFlagReg(flag uint8) {
 	af.SetLow(flag)
 }
 
@@ -20,11 +20,11 @@ func flipFlag(flag uint8) {
 	af.SetLow(af.GetLow() ^ flag)
 }
 
-func toggleFlag(flag uint8) {
+func setFlag(flag uint8) {
 	af.SetLow(af.GetLow() | flag)
 }
 
-func untoggleFlag(flag uint8) {
+func unsetFlag(flag uint8) {
 	af.SetLow(af.GetLow() &^ flag)
 }
 
@@ -47,51 +47,51 @@ func stackPop(reg *SixteenBitReg) {
 }
 
 func invalidOPCode() {
-	fmt.Println("INVALID OP Code")
+	fmt.Println("INVALID opcode")
 }
 
-func opcodesLDFromValue(reg1 *EightBitReg, reg2 uint8) {
-	reg1.SetValue(reg2)
+func opcodesLDValueToReg(reg1 *EightBitReg, value uint8) {
+	reg1.SetValue(value)
 }
 
-func opcodesLDFromAddress(reg *EightBitReg, address uint16) {
+func opcodesLDAddrToReg(reg *EightBitReg, address uint16) {
 	reg.SetValue(mem.Read(address))
 }
 
-func opcodesLDToMemory(address uint16, reg uint8) {
-	mem.Write(address, reg)
+func opcodesLDValueToAddr(address uint16, value uint8) {
+	mem.Write(address, value)
 }
 
 func opcodesOR(number uint8) {
 	result := af.GetHigh() | number
 	af.SetHigh(result)
 	clearAllFlags()
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesXOR(number uint8) {
 	result := af.GetHigh() ^ number
 	af.SetHigh(result)
 	clearAllFlags()
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesAND(number uint8) {
 	result := af.GetHigh() & number
 	af.SetHigh(result)
-	setFlag(flagHalf)
-	toggleZeroFlagFromResult(result)
+	initFlagReg(flagHalf)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesCP(number uint8) {
-	setFlag(flagSub)
+	initFlagReg(flagSub)
 	if af.GetHigh() < number {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	} else if af.GetHigh() == number {
-		toggleFlag(flagZero)
+		setFlag(flagZero)
 	}
 	if ((af.GetHigh() - number) & 0xF) > (af.GetHigh() & 0xF) {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -99,13 +99,13 @@ func opcodesINC(reg *EightBitReg) {
 	result := reg.GetValue() + 1
 	reg.SetValue(result)
 	if isSetFlag(flagCarry) {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 	if (result & 0x0F) == 0x00 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -115,13 +115,13 @@ func opcodesINCHL() {
 	result++
 	mem.Write(address, result)
 	if isSetFlag(flagCarry) {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 	if (result & 0x0F) == 0x00 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -130,14 +130,14 @@ func opcodesDEC(reg *EightBitReg) {
 	result--
 	reg.SetValue(result)
 	if isSetFlag(flagCarry) {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
-	toggleFlag(flagSub)
-	toggleZeroFlagFromResult(result)
+	setFlag(flagSub)
+	setZeroFlagFromResult(result)
 	if (result & 0x0F) == 0x0F {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -147,14 +147,14 @@ func opcodesDECHL() {
 	result--
 	mem.Write(address, result)
 	if isSetFlag(flagCarry) {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
-	toggleFlag(flagSub)
-	toggleZeroFlagFromResult(result)
+	setFlag(flagSub)
+	setZeroFlagFromResult(result)
 	if (result & 0x0F) == 0x0F {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -163,12 +163,12 @@ func opcodesADD(number uint8) {
 	carrybits := uint(af.GetHigh()) ^ uint(number) ^ result
 	af.SetHigh(uint8(result))
 	clearAllFlags()
-	toggleZeroFlagFromResult(uint8(result))
+	setZeroFlagFromResult(uint8(result))
 	if (carrybits & 0x100) != 0 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if (carrybits & 0x10) != 0 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -181,12 +181,12 @@ func opcodesADC(number uint8) {
 	}
 	result := uint(af.GetHigh()) + uint(number) + carry
 	clearAllFlags()
-	toggleZeroFlagFromResult(uint8(result))
+	setZeroFlagFromResult(uint8(result))
 	if result > 0xFF {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if ((uint(af.GetHigh()) & 0x0F) + (uint(number) & 0x0F) + carry) > 0x0F {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 	af.SetHigh(uint8(result))
 }
@@ -195,13 +195,13 @@ func opcodesSUB(number uint8) {
 	result := int(af.GetHigh()) - int(number)
 	carrybits := int(af.GetHigh()) ^ int(number) ^ result
 	af.SetHigh(uint8(result))
-	setFlag(flagSub)
-	toggleZeroFlagFromResult(uint8(result))
+	initFlagReg(flagSub)
+	setZeroFlagFromResult(uint8(result))
 	if (carrybits & 0x100) != 0 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if (carrybits & 0x10) != 0 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 }
 
@@ -213,13 +213,13 @@ func opcodesSBC(number uint8) {
 		carry = 0
 	}
 	result := int(af.GetHigh()) - int(number) - carry
-	setFlag(flagSub)
-	toggleZeroFlagFromResult(uint8(result))
+	initFlagReg(flagSub)
+	setZeroFlagFromResult(uint8(result))
 	if result < 0 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if ((int(af.GetHigh()) & 0x0F) - (int(number) & 0x0F) - carry) < 0 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 	af.SetHigh(uint8(result))
 }
@@ -227,15 +227,15 @@ func opcodesSBC(number uint8) {
 func opcodesADDHL(number uint16) {
 	result := uint(hl.GetValue()) + uint(number)
 	if isSetFlag(flagZero) {
-		setFlag(flagZero)
+		initFlagReg(flagZero)
 	} else {
 		clearAllFlags()
 	}
 	if (result & 0x10000) != 0 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if ((uint(hl.GetValue()) ^ uint(number) ^ (result & 0xFFFF)) & 0x1000) != 0 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 	hl.SetValue(uint16(result))
 }
@@ -245,10 +245,10 @@ func opcodesADDSP(number int8) {
 	clearAllFlags()
 	carrybits := int(sp.GetValue()) ^ int(number) ^ (result & 0xFFFF)
 	if (carrybits & 0x100) == 0x100 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if (carrybits & 0x10) == 0x10 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 	sp.SetValue(uint16(result))
 }
@@ -258,7 +258,7 @@ func opcodesSWAPReg(reg *EightBitReg) {
 	highHalf := (reg.GetValue() >> 4) & 0x0F
 	reg.SetValue((lowHalf << 4) + highHalf)
 	clearAllFlags()
-	toggleZeroFlagFromResult(reg.GetValue())
+	setZeroFlagFromResult(reg.GetValue())
 }
 
 func opcodesSWAPHL() {
@@ -269,37 +269,37 @@ func opcodesSWAPHL() {
 	result = (lowHalf << 4) + highHalf
 	mem.Write(address, result)
 	clearAllFlags()
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesSLA(reg *EightBitReg) {
 	if (reg.GetValue() & 0x80) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result := reg.GetValue() << 1
 	reg.SetValue(result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesSLAHL() {
 	address := hl.GetValue()
 	result := mem.Read(address)
 	if (result & 0x80) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result <<= 1
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesSRA(reg *EightBitReg) {
 	value := reg.GetValue()
 	if (value & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
@@ -308,14 +308,14 @@ func opcodesSRA(reg *EightBitReg) {
 		result |= 0x80
 	}
 	reg.SetValue(result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesSRAHL() {
 	address := hl.GetValue()
 	value := mem.Read(address)
 	if (value & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
@@ -324,44 +324,44 @@ func opcodesSRAHL() {
 		result |= 0x80
 	}
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesSRL(reg *EightBitReg) {
 	result := reg.GetValue()
 	if (result & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result >>= 1
 	reg.SetValue(result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesSRLHL() {
 	address := hl.GetValue()
 	result := mem.Read(address)
 	if (result & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result >>= 1
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesRLC(reg *EightBitReg) {
 	opcodesRLCA(reg)
-	toggleZeroFlagFromResult(reg.GetValue())
+	setZeroFlagFromResult(reg.GetValue())
 }
 
 func opcodesRLCA(reg *EightBitReg) {
 	value := reg.GetValue()
 	result := value << 1
 	if (value & 0x80) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 		result |= 0x01
 	} else {
 		clearAllFlags()
@@ -374,18 +374,18 @@ func opcodesRLCHL() {
 	value := mem.Read(address)
 	result := value << 1
 	if (value & 0x80) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 		result |= 0x01
 	} else {
 		clearAllFlags()
 	}
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesRL(reg *EightBitReg) {
 	opcodesRLA(reg)
-	toggleZeroFlagFromResult(reg.GetValue())
+	setZeroFlagFromResult(reg.GetValue())
 }
 
 func opcodesRLA(reg *EightBitReg) {
@@ -397,7 +397,7 @@ func opcodesRLA(reg *EightBitReg) {
 	}
 	value := reg.GetValue()
 	if (value & 0x80) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
@@ -415,25 +415,25 @@ func opcodesRLHL() {
 	address := hl.GetValue()
 	value := mem.Read(address)
 	if (value & 0x80) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result := (value << 1) | carry
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesRRC(reg *EightBitReg) {
 	opcodesRRCA(reg)
-	toggleZeroFlagFromResult(reg.GetValue())
+	setZeroFlagFromResult(reg.GetValue())
 }
 
 func opcodesRRCA(reg *EightBitReg) {
 	value := reg.GetValue()
 	result := value >> 1
 	if (value & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 		result |= 0x80
 	} else {
 		clearAllFlags()
@@ -446,18 +446,18 @@ func opcodesRRCHL() {
 	value := mem.Read(address)
 	result := value >> 1
 	if (value & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 		result |= 0x80
 	} else {
 		clearAllFlags()
 	}
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesRR(reg *EightBitReg) {
 	opcodesRRA(reg)
-	toggleZeroFlagFromResult(reg.GetValue())
+	setZeroFlagFromResult(reg.GetValue())
 }
 
 func opcodesRRA(reg *EightBitReg) {
@@ -469,7 +469,7 @@ func opcodesRRA(reg *EightBitReg) {
 	}
 	value := reg.GetValue()
 	if (value & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
@@ -487,33 +487,33 @@ func opcodesRRHL() {
 	address := hl.GetValue()
 	value := mem.Read(address)
 	if (value & 0x01) != 0 {
-		setFlag(flagCarry)
+		initFlagReg(flagCarry)
 	} else {
 		clearAllFlags()
 	}
 	result := (value >> 1) | carry
 	mem.Write(address, result)
-	toggleZeroFlagFromResult(result)
+	setZeroFlagFromResult(result)
 }
 
 func opcodesBIT(reg *EightBitReg, bit uint) {
 	if ((reg.GetValue() >> bit) & 0x01) == 0 {
-		toggleFlag(flagZero)
+		setFlag(flagZero)
 	} else {
-		untoggleFlag(flagZero)
+		unsetFlag(flagZero)
 	}
-	toggleFlag(flagHalf)
-	untoggleFlag(flagSub)
+	setFlag(flagHalf)
+	unsetFlag(flagSub)
 }
 
 func opcodesBITHL(bit uint) {
 	if ((mem.Read(hl.GetValue()) >> bit) & 0x01) == 0 {
-		toggleFlag(flagZero)
+		setFlag(flagZero)
 	} else {
-		untoggleFlag(flagZero)
+		unsetFlag(flagZero)
 	}
-	toggleFlag(flagHalf)
-	untoggleFlag(flagSub)
+	setFlag(flagHalf)
+	unsetFlag(flagSub)
 }
 
 func opcodesSET(reg *EightBitReg, bit uint) {

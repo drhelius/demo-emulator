@@ -6,15 +6,15 @@ func opcode0x00() {
 
 func opcode0x01() {
 	// LD BC,nn
-	opcodesLDFromAddress(bc.GetLowReg(), pc.GetValue())
+	opcodesLDAddrToReg(bc.GetLowReg(), pc.GetValue())
 	pc.Increment()
-	opcodesLDFromAddress(bc.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(bc.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
 func opcode0x02() {
 	// LD (BC),A
-	opcodesLDToMemory(bc.GetValue(), af.GetHigh())
+	opcodesLDValueToAddr(bc.GetValue(), af.GetHigh())
 }
 
 func opcode0x03() {
@@ -34,7 +34,7 @@ func opcode0x05() {
 
 func opcode0x06() {
 	// LD B,n
-	opcodesLDFromAddress(bc.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(bc.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
@@ -61,7 +61,7 @@ func opcode0x09() {
 
 func opcode0x0A() {
 	// LD A,(BC)
-	opcodesLDFromAddress(af.GetHighReg(), bc.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), bc.GetValue())
 }
 
 func opcode0x0B() {
@@ -81,7 +81,7 @@ func opcode0x0D() {
 
 func opcode0x0E() {
 	// LD C,n
-	opcodesLDFromAddress(bc.GetLowReg(), pc.GetValue())
+	opcodesLDAddrToReg(bc.GetLowReg(), pc.GetValue())
 	pc.Increment()
 }
 
@@ -97,15 +97,15 @@ func opcode0x10() {
 
 func opcode0x11() {
 	// LD DE,nn
-	opcodesLDFromAddress(de.GetLowReg(), pc.GetValue())
+	opcodesLDAddrToReg(de.GetLowReg(), pc.GetValue())
 	pc.Increment()
-	opcodesLDFromAddress(de.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(de.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
 func opcode0x12() {
 	// LD (DE),A
-	opcodesLDToMemory(de.GetValue(), af.GetHigh())
+	opcodesLDValueToAddr(de.GetValue(), af.GetHigh())
 }
 
 func opcode0x13() {
@@ -125,7 +125,7 @@ func opcode0x15() {
 
 func opcode0x16() {
 	// LD D,n
-	opcodesLDFromAddress(de.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(de.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
@@ -148,7 +148,7 @@ func opcode0x19() {
 
 func opcode0x1A() {
 	// LD A,(DE)
-	opcodesLDFromAddress(af.GetHighReg(), de.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), de.GetValue())
 }
 
 func opcode0x1B() {
@@ -168,7 +168,7 @@ func opcode0x1D() {
 
 func opcode0x1E() {
 	// LD E,n
-	opcodesLDFromAddress(de.GetLowReg(), pc.GetValue())
+	opcodesLDAddrToReg(de.GetLowReg(), pc.GetValue())
 	pc.Increment()
 }
 
@@ -191,15 +191,15 @@ func opcode0x20() {
 
 func opcode0x21() {
 	// LD HL,nn
-	opcodesLDFromAddress(hl.GetLowReg(), pc.GetValue())
+	opcodesLDAddrToReg(hl.GetLowReg(), pc.GetValue())
 	pc.Increment()
-	opcodesLDFromAddress(hl.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(hl.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
 func opcode0x22() {
 	// LD (HLI),A
-	opcodesLDToMemory(hl.GetValue(), af.GetHigh())
+	opcodesLDValueToAddr(hl.GetValue(), af.GetHigh())
 	hl.Increment()
 }
 
@@ -220,7 +220,7 @@ func opcode0x25() {
 
 func opcode0x26() {
 	// LD H,n
-	opcodesLDFromAddress(hl.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(hl.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
@@ -244,16 +244,16 @@ func opcode0x27() {
 		}
 	}
 
-	untoggleFlag(flagHalf)
-	untoggleFlag(flagZero)
+	unsetFlag(flagHalf)
+	unsetFlag(flagZero)
 
 	if (a & 0x100) == 0x100 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 
 	a &= 0xFF
 
-	toggleZeroFlagFromResult(uint8(a))
+	setZeroFlagFromResult(uint8(a))
 
 	af.SetHigh(uint8(a))
 }
@@ -277,7 +277,7 @@ func opcode0x29() {
 
 func opcode0x2A() {
 	// LD A,(HLI)
-	opcodesLDFromAddress(af.GetHighReg(), hl.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), hl.GetValue())
 	hl.Increment()
 }
 
@@ -298,15 +298,15 @@ func opcode0x2D() {
 
 func opcode0x2E() {
 	// LD L,n
-	opcodesLDFromAddress(hl.GetLowReg(), pc.GetValue())
+	opcodesLDAddrToReg(hl.GetLowReg(), pc.GetValue())
 	pc.Increment()
 }
 
 func opcode0x2F() {
 	// CPL
 	af.SetHigh(^af.GetHigh())
-	toggleFlag(flagHalf)
-	toggleFlag(flagSub)
+	setFlag(flagHalf)
+	setFlag(flagSub)
 }
 
 func opcode0x30() {
@@ -331,7 +331,7 @@ func opcode0x31() {
 
 func opcode0x32() {
 	// LD (HLD), A
-	opcodesLDToMemory(hl.GetValue(), af.GetHigh())
+	opcodesLDValueToAddr(hl.GetValue(), af.GetHigh())
 	hl.Decrement()
 }
 
@@ -358,9 +358,9 @@ func opcode0x36() {
 
 func opcode0x37() {
 	// SCF
-	toggleFlag(flagCarry)
-	untoggleFlag(flagHalf)
-	untoggleFlag(flagSub)
+	setFlag(flagCarry)
+	unsetFlag(flagHalf)
+	unsetFlag(flagSub)
 }
 
 func opcode0x38() {
@@ -382,7 +382,7 @@ func opcode0x39() {
 
 func opcode0x3A() {
 	// LD A,(HLD)
-	opcodesLDFromAddress(af.GetHighReg(), hl.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), hl.GetValue())
 	hl.Decrement()
 }
 
@@ -404,285 +404,285 @@ func opcode0x3D() {
 
 func opcode0x3E() {
 	// LD A,n
-	opcodesLDFromAddress(af.GetHighReg(), pc.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), pc.GetValue())
 	pc.Increment()
 }
 
 func opcode0x3F() {
 	// CCF
 	flipFlag(flagCarry)
-	untoggleFlag(flagHalf)
-	untoggleFlag(flagSub)
+	unsetFlag(flagHalf)
+	unsetFlag(flagSub)
 }
 
 func opcode0x40() {
 	// LD B,B
-	opcodesLDFromValue(bc.GetHighReg(), bc.GetHigh())
+	opcodesLDValueToReg(bc.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x41() {
 	// LD B,C
-	opcodesLDFromValue(bc.GetHighReg(), bc.GetLow())
+	opcodesLDValueToReg(bc.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x42() {
 	// LD B,D
-	opcodesLDFromValue(bc.GetHighReg(), de.GetHigh())
+	opcodesLDValueToReg(bc.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x43() {
 	// LD B,E
-	opcodesLDFromValue(bc.GetHighReg(), de.GetLow())
+	opcodesLDValueToReg(bc.GetHighReg(), de.GetLow())
 }
 
 func opcode0x44() {
 	// LD B,H
-	opcodesLDFromValue(bc.GetHighReg(), hl.GetHigh())
+	opcodesLDValueToReg(bc.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x45() {
 	// LD B,L
-	opcodesLDFromValue(bc.GetHighReg(), hl.GetLow())
+	opcodesLDValueToReg(bc.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x46() {
 	// LD B,(HL)
-	opcodesLDFromAddress(bc.GetHighReg(), hl.GetValue())
+	opcodesLDAddrToReg(bc.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x47() {
 	// LD B,A
-	opcodesLDFromValue(bc.GetHighReg(), af.GetHigh())
+	opcodesLDValueToReg(bc.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x48() {
 	// LD C,B
-	opcodesLDFromValue(bc.GetLowReg(), bc.GetHigh())
+	opcodesLDValueToReg(bc.GetLowReg(), bc.GetHigh())
 }
 
 func opcode0x49() {
 	// LD C,C
-	opcodesLDFromValue(bc.GetLowReg(), bc.GetLow())
+	opcodesLDValueToReg(bc.GetLowReg(), bc.GetLow())
 }
 
 func opcode0x4A() {
 	// LD C,D
-	opcodesLDFromValue(bc.GetLowReg(), de.GetHigh())
+	opcodesLDValueToReg(bc.GetLowReg(), de.GetHigh())
 }
 
 func opcode0x4B() {
 	// LD C,E
-	opcodesLDFromValue(bc.GetLowReg(), de.GetLow())
+	opcodesLDValueToReg(bc.GetLowReg(), de.GetLow())
 }
 
 func opcode0x4C() {
 	// LD C,H
-	opcodesLDFromValue(bc.GetLowReg(), hl.GetHigh())
+	opcodesLDValueToReg(bc.GetLowReg(), hl.GetHigh())
 }
 
 func opcode0x4D() {
 	// LD C,L
-	opcodesLDFromValue(bc.GetLowReg(), hl.GetLow())
+	opcodesLDValueToReg(bc.GetLowReg(), hl.GetLow())
 }
 
 func opcode0x4E() {
 	// LD C,(HL)
-	opcodesLDFromAddress(bc.GetLowReg(), hl.GetValue())
+	opcodesLDAddrToReg(bc.GetLowReg(), hl.GetValue())
 }
 
 func opcode0x4F() {
 	// LD C,A
-	opcodesLDFromValue(bc.GetLowReg(), af.GetHigh())
+	opcodesLDValueToReg(bc.GetLowReg(), af.GetHigh())
 }
 
 func opcode0x50() {
 	// LD D,B
-	opcodesLDFromValue(de.GetHighReg(), bc.GetHigh())
+	opcodesLDValueToReg(de.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x51() {
 	// LD D,C
-	opcodesLDFromValue(de.GetHighReg(), bc.GetLow())
+	opcodesLDValueToReg(de.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x52() {
 	// LD D,D
-	opcodesLDFromValue(de.GetHighReg(), de.GetHigh())
+	opcodesLDValueToReg(de.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x53() {
 	// LD D,E
-	opcodesLDFromValue(de.GetHighReg(), de.GetLow())
+	opcodesLDValueToReg(de.GetHighReg(), de.GetLow())
 }
 
 func opcode0x54() {
 	// LD D,H
-	opcodesLDFromValue(de.GetHighReg(), hl.GetHigh())
+	opcodesLDValueToReg(de.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x55() {
 	// LD D,L
-	opcodesLDFromValue(de.GetHighReg(), hl.GetLow())
+	opcodesLDValueToReg(de.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x56() {
 	// LD D,(HL)
-	opcodesLDFromAddress(de.GetHighReg(), hl.GetValue())
+	opcodesLDAddrToReg(de.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x57() {
 	// LD D,A
-	opcodesLDFromValue(de.GetHighReg(), af.GetHigh())
+	opcodesLDValueToReg(de.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x58() {
 	// LD E,B
-	opcodesLDFromValue(de.GetLowReg(), bc.GetHigh())
+	opcodesLDValueToReg(de.GetLowReg(), bc.GetHigh())
 }
 
 func opcode0x59() {
 	// LD E,C
-	opcodesLDFromValue(de.GetLowReg(), bc.GetLow())
+	opcodesLDValueToReg(de.GetLowReg(), bc.GetLow())
 }
 
 func opcode0x5A() {
 	// LD E,D
-	opcodesLDFromValue(de.GetLowReg(), de.GetHigh())
+	opcodesLDValueToReg(de.GetLowReg(), de.GetHigh())
 }
 
 func opcode0x5B() {
 	// LD E,E
-	opcodesLDFromValue(de.GetLowReg(), de.GetLow())
+	opcodesLDValueToReg(de.GetLowReg(), de.GetLow())
 }
 
 func opcode0x5C() {
 	// LD E,H
-	opcodesLDFromValue(de.GetLowReg(), hl.GetHigh())
+	opcodesLDValueToReg(de.GetLowReg(), hl.GetHigh())
 }
 
 func opcode0x5D() {
 	// LD E,L
-	opcodesLDFromValue(de.GetLowReg(), hl.GetLow())
+	opcodesLDValueToReg(de.GetLowReg(), hl.GetLow())
 }
 
 func opcode0x5E() {
 	// LD E,(HL)
-	opcodesLDFromAddress(de.GetLowReg(), hl.GetValue())
+	opcodesLDAddrToReg(de.GetLowReg(), hl.GetValue())
 }
 
 func opcode0x5F() {
 	// LD E,A
-	opcodesLDFromValue(de.GetLowReg(), af.GetHigh())
+	opcodesLDValueToReg(de.GetLowReg(), af.GetHigh())
 }
 
 func opcode0x60() {
 	// LD H,B
-	opcodesLDFromValue(hl.GetHighReg(), bc.GetHigh())
+	opcodesLDValueToReg(hl.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x61() {
 	// LD H,C
-	opcodesLDFromValue(hl.GetHighReg(), bc.GetLow())
+	opcodesLDValueToReg(hl.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x62() {
 	// LD H,D
-	opcodesLDFromValue(hl.GetHighReg(), de.GetHigh())
+	opcodesLDValueToReg(hl.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x63() {
 	// LD H,E
-	opcodesLDFromValue(hl.GetHighReg(), de.GetLow())
+	opcodesLDValueToReg(hl.GetHighReg(), de.GetLow())
 }
 
 func opcode0x64() {
 	// LD H,H
-	opcodesLDFromValue(hl.GetHighReg(), hl.GetHigh())
+	opcodesLDValueToReg(hl.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x65() {
 	// LD H,L
-	opcodesLDFromValue(hl.GetHighReg(), hl.GetLow())
+	opcodesLDValueToReg(hl.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x66() {
 	// LD H,(HL)
-	opcodesLDFromAddress(hl.GetHighReg(), hl.GetValue())
+	opcodesLDAddrToReg(hl.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x67() {
 	// LD H,A
-	opcodesLDFromValue(hl.GetHighReg(), af.GetHigh())
+	opcodesLDValueToReg(hl.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x68() {
 	// LD L,B
-	opcodesLDFromValue(hl.GetLowReg(), bc.GetHigh())
+	opcodesLDValueToReg(hl.GetLowReg(), bc.GetHigh())
 }
 
 func opcode0x69() {
 	// LD L,C
-	opcodesLDFromValue(hl.GetLowReg(), bc.GetLow())
+	opcodesLDValueToReg(hl.GetLowReg(), bc.GetLow())
 }
 
 func opcode0x6A() {
 	// LD L,D
-	opcodesLDFromValue(hl.GetLowReg(), de.GetHigh())
+	opcodesLDValueToReg(hl.GetLowReg(), de.GetHigh())
 }
 
 func opcode0x6B() {
 	// LD L,E
-	opcodesLDFromValue(hl.GetLowReg(), de.GetLow())
+	opcodesLDValueToReg(hl.GetLowReg(), de.GetLow())
 }
 
 func opcode0x6C() {
 	// LD L,H
-	opcodesLDFromValue(hl.GetLowReg(), hl.GetHigh())
+	opcodesLDValueToReg(hl.GetLowReg(), hl.GetHigh())
 }
 
 func opcode0x6D() {
 	// LD L,L
-	opcodesLDFromValue(hl.GetLowReg(), hl.GetLow())
+	opcodesLDValueToReg(hl.GetLowReg(), hl.GetLow())
 }
 
 func opcode0x6E() {
 	// LD L,(HL)
-	opcodesLDFromAddress(hl.GetLowReg(), hl.GetValue())
+	opcodesLDAddrToReg(hl.GetLowReg(), hl.GetValue())
 }
 
 func opcode0x6F() {
 	// LD L,A
-	opcodesLDFromValue(hl.GetLowReg(), af.GetHigh())
+	opcodesLDValueToReg(hl.GetLowReg(), af.GetHigh())
 }
 
 func opcode0x70() {
 	// LD (HL),B
-	opcodesLDToMemory(hl.GetValue(), bc.GetHigh())
+	opcodesLDValueToAddr(hl.GetValue(), bc.GetHigh())
 }
 
 func opcode0x71() {
 	// LD (HL),C
-	opcodesLDToMemory(hl.GetValue(), bc.GetLow())
+	opcodesLDValueToAddr(hl.GetValue(), bc.GetLow())
 }
 
 func opcode0x72() {
 	// LD (HL),D
-	opcodesLDToMemory(hl.GetValue(), de.GetHigh())
+	opcodesLDValueToAddr(hl.GetValue(), de.GetHigh())
 }
 
 func opcode0x73() {
 	// LD (HL),E
-	opcodesLDToMemory(hl.GetValue(), de.GetLow())
+	opcodesLDValueToAddr(hl.GetValue(), de.GetLow())
 }
 
 func opcode0x74() {
 	// LD (HL),H
-	opcodesLDToMemory(hl.GetValue(), hl.GetHigh())
+	opcodesLDValueToAddr(hl.GetValue(), hl.GetHigh())
 }
 
 func opcode0x75() {
 	// LD (HL),L
-	opcodesLDToMemory(hl.GetValue(), hl.GetLow())
+	opcodesLDValueToAddr(hl.GetValue(), hl.GetLow())
 }
 
 func opcode0x76() {
@@ -710,47 +710,47 @@ func opcode0x76() {
 
 func opcode0x77() {
 	// LD (HL),A
-	opcodesLDToMemory(hl.GetValue(), af.GetHigh())
+	opcodesLDValueToAddr(hl.GetValue(), af.GetHigh())
 }
 
 func opcode0x78() {
 	// LD A,B
-	opcodesLDFromValue(af.GetHighReg(), bc.GetHigh())
+	opcodesLDValueToReg(af.GetHighReg(), bc.GetHigh())
 }
 
 func opcode0x79() {
 	// LD A,C
-	opcodesLDFromValue(af.GetHighReg(), bc.GetLow())
+	opcodesLDValueToReg(af.GetHighReg(), bc.GetLow())
 }
 
 func opcode0x7A() {
 	// LD A,D
-	opcodesLDFromValue(af.GetHighReg(), de.GetHigh())
+	opcodesLDValueToReg(af.GetHighReg(), de.GetHigh())
 }
 
 func opcode0x7B() {
 	// LD A,E
-	opcodesLDFromValue(af.GetHighReg(), de.GetLow())
+	opcodesLDValueToReg(af.GetHighReg(), de.GetLow())
 }
 
 func opcode0x7C() {
 	// LD A,H
-	opcodesLDFromValue(af.GetHighReg(), hl.GetHigh())
+	opcodesLDValueToReg(af.GetHighReg(), hl.GetHigh())
 }
 
 func opcode0x7D() {
 	// LD A,L
-	opcodesLDFromValue(af.GetHighReg(), hl.GetLow())
+	opcodesLDValueToReg(af.GetHighReg(), hl.GetLow())
 }
 
 func opcode0x7E() {
 	// LD A,(HL)
-	opcodesLDFromAddress(af.GetHighReg(), hl.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), hl.GetValue())
 }
 
 func opcode0x7F() {
 	// LD A,A
-	opcodesLDFromValue(af.GetHighReg(), af.GetHigh())
+	opcodesLDValueToReg(af.GetHighReg(), af.GetHigh())
 }
 
 func opcode0x80() {
@@ -1350,7 +1350,7 @@ func opcode0xDF() {
 
 func opcode0xE0() {
 	// LD (0xFF00+n),A
-	opcodesLDToMemory(0xFF00+uint16(mem.Read(pc.GetValue())), af.GetHigh())
+	opcodesLDValueToAddr(0xFF00+uint16(mem.Read(pc.GetValue())), af.GetHigh())
 	pc.Increment()
 }
 
@@ -1361,7 +1361,7 @@ func opcode0xE1() {
 
 func opcode0xE2() {
 	// LD (0xFF00+C),A
-	opcodesLDToMemory(0xFF00+uint16(bc.GetLow()), af.GetHigh())
+	opcodesLDValueToAddr(0xFF00+uint16(bc.GetLow()), af.GetHigh())
 }
 
 func opcode0xE3() {
@@ -1407,7 +1407,7 @@ func opcode0xEA() {
 	pc.Increment()
 	tmp.SetHigh(mem.Read(pc.GetValue()))
 	pc.Increment()
-	opcodesLDToMemory(tmp.GetValue(), af.GetHigh())
+	opcodesLDValueToAddr(tmp.GetValue(), af.GetHigh())
 }
 
 func opcode0xEB() {
@@ -1436,7 +1436,7 @@ func opcode0xEF() {
 
 func opcode0xF0() {
 	// LD A,(0xFF00+n)
-	opcodesLDFromAddress(af.GetHighReg(), 0xFF00+uint16(mem.Read(pc.GetValue())))
+	opcodesLDAddrToReg(af.GetHighReg(), 0xFF00+uint16(mem.Read(pc.GetValue())))
 	pc.Increment()
 }
 
@@ -1448,7 +1448,7 @@ func opcode0xF1() {
 
 func opcode0xF2() {
 	// LD A,(C)
-	opcodesLDFromAddress(af.GetHighReg(), 0xFF00+uint16(bc.GetLow()))
+	opcodesLDAddrToReg(af.GetHighReg(), 0xFF00+uint16(bc.GetLow()))
 }
 
 func opcode0xF3() {
@@ -1485,10 +1485,10 @@ func opcode0xF8() {
 	result := uint16(value)
 	clearAllFlags()
 	if ((sp.GetValue() ^ uint16(offset) ^ result) & 0x100) == 0x100 {
-		toggleFlag(flagCarry)
+		setFlag(flagCarry)
 	}
 	if ((sp.GetValue() ^ uint16(offset) ^ result) & 0x10) == 0x10 {
-		toggleFlag(flagHalf)
+		setFlag(flagHalf)
 	}
 	hl.SetValue(result)
 	pc.Increment()
@@ -1506,7 +1506,7 @@ func opcode0xFA() {
 	pc.Increment()
 	tmp.SetHigh(mem.Read(pc.GetValue()))
 	pc.Increment()
-	opcodesLDFromAddress(af.GetHighReg(), tmp.GetValue())
+	opcodesLDAddrToReg(af.GetHighReg(), tmp.GetValue())
 }
 
 func opcode0xFB() {

@@ -35,10 +35,9 @@ func SetMapper(m mapper.Mapper) {
 // Then updates the frameBuffer and returns true if the simulation reached the vblank
 func Tick(cycles uint) bool {
 	vblank := false
+	statusModeCycles += cycles
 
 	if ScreenEnabled {
-		statusModeCycles += cycles
-
 		switch statusMode {
 		case 0:
 			// During H-BLANK
@@ -118,6 +117,11 @@ func Tick(cycles uint) bool {
 					cpu.RequestInterrupt(cpu.InterruptLCDSTAT)
 				}
 			}
+		}
+	} else {
+		if statusModeCycles >= 70224 {
+			statusModeCycles -= 70224
+			vblank = true
 		}
 	}
 

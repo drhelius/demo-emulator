@@ -8,6 +8,9 @@ var opcodeCBArray opcodeFuncArray
 
 func init() {
 
+	// this two arrays store the poiters to
+	// all the opcodes functions
+
 	opcodeArray[0x00] = opcode0x00
 	opcodeArray[0x01] = opcode0x01
 	opcodeArray[0x02] = opcode0x02

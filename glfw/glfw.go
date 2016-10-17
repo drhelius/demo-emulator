@@ -10,6 +10,8 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
+// multiplier to control the size of the Window
+// Width = GbWidth * zoom, Height = GbHeight * zoom
 const zoom = 5
 
 var window *glfw.Window
@@ -27,18 +29,26 @@ func Setup() {
 
 	fmt.Println("glfw init ok")
 
+	// fixed size window
 	glfw.WindowHint(glfw.Resizable, glfw.False)
+
+	// sets the OpenGL version to 2.1
 	glfw.WindowHint(glfw.ContextVersionMajor, 2)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+
 	var err error
-	window, err = glfw.CreateWindow(160*zoom, 144*zoom, "Codemotion 2016 - GB Emu", nil, nil)
+	window, err = glfw.CreateWindow(util.GbWidth*zoom, util.GbHeight*zoom, "Codemotion 2016 - GB Emu", nil, nil)
 	if err != nil {
 		panic(err)
 	}
 
+	// sets the callback to receive input events
 	window.SetKeyCallback(onKey)
+
+	// move the rendering context to this thread
 	window.MakeContextCurrent()
 
+	// enable vsync, forces 60fps on most displays
 	glfw.SwapInterval(1)
 
 	fmt.Println("window ok")
@@ -50,7 +60,7 @@ func Update() {
 	glfw.PollEvents()
 }
 
-// WindowClosed checks if the window has been closed
+// WindowClosed checks if the window has been closed by the user
 func WindowClosed() bool {
 	return window.ShouldClose()
 }
@@ -61,6 +71,9 @@ func Teardown() {
 }
 
 func onKey(window *glfw.Window, k glfw.Key, s int, action glfw.Action, mods glfw.ModifierKey) {
+
+	// check for key press / release events
+	// and notifiy the emulator accordingly
 
 	switch glfw.Key(k) {
 	case glfw.KeyEnter:

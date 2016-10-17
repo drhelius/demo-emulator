@@ -2,7 +2,8 @@ package mbcs
 
 import "fmt"
 
-// MBC1 is the public type for Memory
+// MBC1 is a mapper implementation to emulate
+// cartridges with a MBC1 memory bank controller
 type MBC1 struct {
 	memoryMap       []uint8
 	rom             []uint8
@@ -30,6 +31,8 @@ func (m *MBC1) GetROM() []uint8 {
 // Setup Receives the rom data and intializes memory
 func (m *MBC1) Setup(r []uint8) {
 	m.rom = r
+	m.romBank = 1
+
 	m.memoryMap = make([]uint8, 0x10000)
 	m.ram = make([]uint8, 0x8000)
 
@@ -37,16 +40,20 @@ func (m *MBC1) Setup(r []uint8) {
 		m.memoryMap[0xFF00+i] = initialValuesForFFXX[i]
 	}
 
-	m.romBank = 1
 	m.ramSize = m.rom[0x149]
+	ramBanks := 0
+
 	switch m.ramSize {
 	case 0x00:
-		fallthrough
+		ramBanks = 0
+		m.higherRAMBank = 0x00
 	case 0x01:
 		fallthrough
 	case 0x02:
+		ramBanks = 1
 		m.higherRAMBank = 0x00
 	default:
+		ramBanks = 4
 		m.higherRAMBank = 0x03
 		break
 	}
@@ -54,7 +61,7 @@ func (m *MBC1) Setup(r []uint8) {
 	m.higherROMBank = uint(max(pow2Ceil(len(m.rom)/0x4000), 2) - 1)
 
 	fmt.Printf("%d ROM banks\n", m.higherROMBank+1)
-	fmt.Printf("%d RAM banks\n", m.higherRAMBank+1)
+	fmt.Printf("%d RAM banks\n", ramBanks)
 }
 
 // Read returns the 8 bit value at the 16 bit address of the memory
@@ -77,7 +84,7 @@ func (m *MBC1) Read(addr uint16) uint8 {
 		fmt.Printf("*** attempting to read from disabled RAM %X\n", addr)
 		return 0xFF
 	case addr >= 0xFF00:
-		// IO Registers
+		// IO registers
 		return ReadIO(addr, m.memoryMap)
 	}
 	return m.memoryMap[addr]
@@ -87,10 +94,12 @@ func (m *MBC1) Read(addr uint16) uint8 {
 func (m *MBC1) Write(addr uint16, value uint8) {
 	switch {
 	case (addr >= 0x0000) && (addr < 0x2000):
+		// enable / disable RAM
 		if m.ramSize > 0 {
 			m.ramEnabled = ((value & 0x0F) == 0x0A)
 		}
 	case (addr >= 0x2000) && (addr < 0x4000):
+		// select ROM bank
 		if m.mode == 0 {
 			m.romBank = uint(value&0x1F) | (m.romBankHighBits << 5)
 		} else {
@@ -102,9 +111,11 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 		m.romBank &= m.higherROMBank
 	case (addr >= 0x4000) && (addr < 0x6000):
 		if m.mode == 1 {
+			// select RAM bank
 			m.ramBank = uint16(value & 0x03)
 			m.ramBank &= m.higherRAMBank
 		} else {
+			// select high bits of ROM bank
 			m.romBankHighBits = uint(value & 0x03)
 			m.romBank = (m.romBank & 0x1F) | (m.romBankHighBits << 5)
 			if m.romBank == 0x00 || m.romBank == 0x20 || m.romBank == 0x40 || m.romBank == 0x60 {
@@ -113,12 +124,14 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 			m.romBank &= m.higherROMBank
 		}
 	case (addr >= 0x6000) && (addr < 0x8000):
+		// operation mode
 		if (m.ramSize != 3) && ((value & 0x01) != 0) {
 			fmt.Printf("*** attempting to change MBC1 to mode 1 with incorrect RAM banks %X %X\n", addr, value)
 		} else {
 			m.mode = value & 0x01
 		}
 	case (addr >= 0xA000) && (addr < 0xC000):
+		// cartridge RAM
 		if m.ramEnabled {
 			if m.mode == 0 {
 				m.ram[addr-0xA000] = value
@@ -129,9 +142,10 @@ func (m *MBC1) Write(addr uint16, value uint8) {
 			fmt.Printf("*** attempting to write to disabled RAM %X %X\n", addr, value)
 		}
 	case (addr >= 0xC000) && (addr < 0xFE00):
+		// internal RAM
 		WriteCommon(addr, value, m.memoryMap)
 	case addr >= 0xFF00:
-		// IO Registers
+		// IO registers
 		WriteIO(addr, value, m.memoryMap, m)
 	default:
 		m.memoryMap[addr] = value

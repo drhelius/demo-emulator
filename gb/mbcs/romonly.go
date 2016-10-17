@@ -2,7 +2,8 @@ package mbcs
 
 import "fmt"
 
-// RomOnly is the public type for Memory
+// RomOnly is a mapper implementation to emulate
+// cartridges with only a ROM chip
 type RomOnly struct {
 	memoryMap []uint8
 	rom       []uint8
@@ -48,6 +49,7 @@ func (m *RomOnly) Write(addr uint16, value uint8) {
 		// ROM
 		fmt.Printf("*** attempting to write on ROM address %X %X\n", addr, value)
 	case (addr >= 0xC000) && (addr < 0xFE00):
+		// Internal RAM
 		WriteCommon(addr, value, m.memoryMap)
 	case addr >= 0xFF00:
 		// IO Registers

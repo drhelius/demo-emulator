@@ -27,12 +27,12 @@ func Tick(cycles uint) {
 	}
 }
 
-// Read returns the 8 bit value at the 16 bit address of the memory
+// Read returns the P1 register
 func Read() uint8 {
 	return p1
 }
 
-// Write stores the 8 bit value at the 16 bit address of the memory
+// Write stores the P1 register
 func Write(value uint8) {
 	p1 = (p1 & 0xCF) | (value & 0x30)
 	update()

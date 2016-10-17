@@ -698,6 +698,10 @@ func opcode0x76() {
 
 		halted = true
 
+		// if there is an interrupt pending and
+		// the cpu is halted it fails to advance the PC register
+		// once the cpu resumes operation
+		// this bug is present in all the original DMGs
 		if !ime && ((ifreg & iereg & 0x1F) != 0) {
 			skipPCBug = true
 		}

@@ -12,6 +12,7 @@ const (
 	InterruptJoypad  uint8 = 0x10
 )
 
+// All the flags in the F register
 const (
 	flagZero  uint8 = 0x80
 	flagSub   uint8 = 0x40
@@ -56,6 +57,7 @@ func Tick() uint {
 	clockCycles = 0
 
 	if halted {
+		// if an interrupt is pending leave halt
 		if interruptPending() != InterruptNone {
 			halted = false
 		} else {
@@ -64,13 +66,18 @@ func Tick() uint {
 	}
 
 	if !halted {
+		// acknowledge any pending interrupt s
 		serveInterrupt(interruptPending())
+
+		// fetch the next opcode and execute it
 		runOpcode(fetchOpcode())
 	}
 
 	updateTimers()
 	updateSerial()
 
+	// this is in order to delay the activation
+	// of ima one instruction
 	if imeCycles > 0 {
 		imeCycles -= int(clockCycles)
 		if imeCycles <= 0 {
@@ -89,11 +96,17 @@ func RequestInterrupt(interrupt uint8) {
 
 func fetchOpcode() uint8 {
 	opcode := mem.Read(pc.GetValue())
+
+	// if there is an interrupt pending and
+	// the cpu is halted it fails to advance the PC register
+	// once the cpu resumes operation
+	// this bug is present in all the original DMGs
 	if skipPCBug {
 		skipPCBug = false
 	} else {
 		pc.Increment()
 	}
+
 	return opcode
 }
 

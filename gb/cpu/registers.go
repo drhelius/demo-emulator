@@ -5,7 +5,7 @@ type EightBitReg struct {
 	value uint8
 }
 
-// SixteenBitReg models an 16 bit processor register
+// SixteenBitReg models a 16 bit processor register
 type SixteenBitReg struct {
 	high EightBitReg
 	low  EightBitReg

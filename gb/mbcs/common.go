@@ -1,6 +1,7 @@
 package mbcs
 
-// WriteCommon stores the 8 bit value at the 16 bit address of the memory
+// WriteCommon emulates the internal RAM 0xC000-0xD000
+// and the mirror of the internal RAM 0xE000-0xFE00
 func WriteCommon(addr uint16, value uint8, mem []uint8) {
 	switch {
 	case (addr >= 0xC000) && (addr < 0xDE00):

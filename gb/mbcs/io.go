@@ -8,7 +8,7 @@ import (
 	"github.com/drhelius/demo-emulator/gb/video"
 )
 
-// ReadIO returns the 8 bit value at the 16 bit address of the memory
+// ReadIO returns the values of the special IO registers
 func ReadIO(addr uint16, mem []uint8) uint8 {
 	switch addr {
 	case 0xFF00:
@@ -24,6 +24,7 @@ func ReadIO(addr uint16, mem []uint8) uint8 {
 		// STAT
 		return mem[addr] | 0x80
 	case 0xFF44:
+		// LY
 		if video.ScreenEnabled {
 			return mem[0xFF44]
 		}
@@ -36,7 +37,7 @@ func ReadIO(addr uint16, mem []uint8) uint8 {
 	return mem[addr]
 }
 
-// WriteIO stores the 8 bit value at the 16 bit address of the memory
+// WriteIO stores the values of the special IO registers
 func WriteIO(addr uint16, value uint8, mem []uint8, m mapper.Mapper) {
 	switch addr {
 	case 0xFF00:

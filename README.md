@@ -14,15 +14,15 @@ Before you start make sure you have Go installed and ready to build applciations
 
 Once you have a working Go environment you'll need to install the following dependecies:
 
-### Windows
+#### Windows
 
 - GCC 64 bit installed: http://tdm-gcc.tdragon.net/download
 
-### Linux
+#### Linux
 
 - Ubuntu: <code>sudo apt-get install build-essential libgl1-mesa-dev xorg-dev</code>
 
-### Mac OS X
+#### Mac OS X
 
 - You need Xcode or Command Line Tools for Xcode (<code>xcode-select --install</code>) for required headers and libraries.
 

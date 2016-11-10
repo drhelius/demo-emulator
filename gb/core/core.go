@@ -26,7 +26,7 @@ func RunToVBlank(colorFrameBuffer []uint8) {
 	// keep updating each system
 	// until the vblank is reached
 	for vblank := false; !vblank; {
-		var clockCycles = cpu.Tick()
+		clockCycles := cpu.Tick()
 		vblank = video.Tick(clockCycles)
 		input.Tick(clockCycles)
 	}

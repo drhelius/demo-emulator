@@ -77,10 +77,7 @@ func opcodesXOR(number uint8) {
 }
 
 func opcodesAND(number uint8) {
-	result := af.GetHigh() & number
-	af.SetHigh(result)
-	initFlagReg(flagHalf)
-	setZeroFlagFromResult(result)
+	// workshop
 }
 
 func opcodesCP(number uint8) {
@@ -96,17 +93,7 @@ func opcodesCP(number uint8) {
 }
 
 func opcodesINC(reg *EightBitReg) {
-	result := reg.GetValue() + 1
-	reg.SetValue(result)
-	if isSetFlag(flagCarry) {
-		initFlagReg(flagCarry)
-	} else {
-		clearAllFlags()
-	}
-	setZeroFlagFromResult(result)
-	if (result & 0x0F) == 0x00 {
-		setFlag(flagHalf)
-	}
+	// workshop
 }
 
 func opcodesINCHL() {
@@ -173,22 +160,7 @@ func opcodesADD(number uint8) {
 }
 
 func opcodesADC(number uint8) {
-	var carry uint
-	if isSetFlag(flagCarry) {
-		carry = 1
-	} else {
-		carry = 0
-	}
-	result := uint(af.GetHigh()) + uint(number) + carry
-	clearAllFlags()
-	setZeroFlagFromResult(uint8(result))
-	if result > 0xFF {
-		setFlag(flagCarry)
-	}
-	if ((uint(af.GetHigh()) & 0x0F) + (uint(number) & 0x0F) + carry) > 0x0F {
-		setFlag(flagHalf)
-	}
-	af.SetHigh(uint8(result))
+	// workshop
 }
 
 func opcodesSUB(number uint8) {

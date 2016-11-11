@@ -228,7 +228,7 @@ func opcode0x27() {
 	// DAA
 	a := uint16(af.GetHigh())
 
-	if !isSetFlag(flagSub) {
+	if !isSetFlag(flagNegative) {
 		if isSetFlag(flagHalf) || ((a & 0xF) > 9) {
 			a += 0x06
 		}
@@ -244,8 +244,8 @@ func opcode0x27() {
 		}
 	}
 
-	unsetFlag(flagHalf)
-	unsetFlag(flagZero)
+	resetFlag(flagHalf)
+	resetFlag(flagZero)
 
 	if (a & 0x100) == 0x100 {
 		setFlag(flagCarry)
@@ -306,7 +306,7 @@ func opcode0x2F() {
 	// CPL
 	af.SetHigh(^af.GetHigh())
 	setFlag(flagHalf)
-	setFlag(flagSub)
+	setFlag(flagNegative)
 }
 
 func opcode0x30() {
@@ -359,8 +359,8 @@ func opcode0x36() {
 func opcode0x37() {
 	// SCF
 	setFlag(flagCarry)
-	unsetFlag(flagHalf)
-	unsetFlag(flagSub)
+	resetFlag(flagHalf)
+	resetFlag(flagNegative)
 }
 
 func opcode0x38() {
@@ -411,8 +411,8 @@ func opcode0x3E() {
 func opcode0x3F() {
 	// CCF
 	flipFlag(flagCarry)
-	unsetFlag(flagHalf)
-	unsetFlag(flagSub)
+	resetFlag(flagHalf)
+	resetFlag(flagNegative)
 }
 
 func opcode0x40() {

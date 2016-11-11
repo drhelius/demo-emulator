@@ -14,11 +14,11 @@ const (
 
 // All the flags in the F register
 const (
-	flagZero  uint8 = 0x80
-	flagSub   uint8 = 0x40
-	flagHalf  uint8 = 0x20
-	flagCarry uint8 = 0x10
-	flagNone  uint8 = 0x00
+	flagZero     uint8 = 0x80
+	flagNegative uint8 = 0x40
+	flagHalf     uint8 = 0x20
+	flagCarry    uint8 = 0x10
+	flagNone     uint8 = 0x00
 )
 
 var (

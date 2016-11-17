@@ -33,7 +33,7 @@ Building
 Run this command to let Go download and build the sources. You don't even need to clone this repo, Go will do it for you:
 
 ```
-go get github.com/drhelius/demo-emulator
+go get -u github.com/drhelius/demo-emulator
 ```
 
 Running

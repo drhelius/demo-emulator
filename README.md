@@ -2,7 +2,7 @@ demo-emulator [![Build Status](https://travis-ci.org/drhelius/demo-emulator.svg?
 =======
 <b>Copyright &copy; 2016 by Ignacio Sanchez</b>
 
-Nintendo Game Boy emulator written in Go.
+Nintendo Game Boy emulator written in Go to be used in workshops about emulator programming.
 
 Follow me on Twitter for updates: http://twitter.com/drhelius
 

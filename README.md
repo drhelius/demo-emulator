@@ -8,6 +8,10 @@ Follow me on Twitter for updates: http://twitter.com/drhelius
 
 ![Screenshot](/screenshots/screenshot1.png "Screenshot") ![Screenshot](/screenshots/screenshot2.png "Screenshot")
 
+Presentation
+------------
+
+https://speakerdeck.com/drhelius/8-bit-emulator-programming-with-go
 
 Requirements
 ------------

@@ -27,6 +27,7 @@ Once you have a working Go environment you'll need to install the following depe
 #### Linux
 
 - Ubuntu: <code>sudo apt-get install build-essential libgl1-mesa-dev xorg-dev</code>
+- Fedora: <code>sudo dnf install @development-tools libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel mesa-libGL-devel libXi-devel</code>
 
 #### Mac OS X
 

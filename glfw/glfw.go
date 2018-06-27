@@ -37,7 +37,7 @@ func Setup() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 
 	var err error
-	window, err = glfw.CreateWindow(util.GbWidth*zoom, util.GbHeight*zoom, "Codemotion 2016 - GB Emu", nil, nil)
+	window, err = glfw.CreateWindow(util.GbWidth*zoom, util.GbHeight*zoom, "Hack & Sangria - GB Emu", nil, nil)
 	if err != nil {
 		panic(err)
 	}

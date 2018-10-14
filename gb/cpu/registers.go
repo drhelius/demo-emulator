@@ -28,7 +28,7 @@ func (reg *EightBitReg) Increment() {
 
 // Decrement decrements (--) the 8 bit value of the register
 func (reg *EightBitReg) Decrement() {
-	reg.value++
+	reg.value--
 }
 
 // SetHigh sets the 8 bit value of the 16 bit higher part
